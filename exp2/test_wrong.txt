@@ -1,0 +1,21 @@
+int aaa = 33, b, c = 44;
+int bb = 3;
+str aaa = 13441;
+
+str sjssh()
+{
+    str b = "aaa" + "ddd";
+    print c;
+    return c;
+}
+
+int func(int paral, str para2, int para3, int para4, str para5)
+{
+    int bb = 456;
+    str kkk = "1";
+    str ggg;
+}
+while(bb > 111)
+{
+    bb = bb -1;
+}
