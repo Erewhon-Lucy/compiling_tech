@@ -491,7 +491,6 @@ int statement()
 	{
 		expr_statement();
 	}
-	
 }
 
 // statement_list
@@ -717,9 +716,10 @@ loop:
 
 typedef struct _ast ast;
 typedef struct _ast *past;
-struct _ast{
+struct _ast
+{
 	int ivalue;
-	char* nodeType;
+	char *nodeType;
 	past left;
 	past right;
 };
@@ -727,7 +727,7 @@ struct _ast{
 past newAstNode()
 {
 	past node = malloc(sizeof(ast));
-	if(node == NULL)
+	if (node == NULL)
 	{
 		printf("run out of memory.\n");
 		exit(0);
@@ -736,6 +736,20 @@ past newAstNode()
 	return node;
 }
 
+past newKey(int value)
+{
+	past var = newAstNode();
+	var->nodeType = "keyWord";
+	var->ivalue = value;
+	return var;
+}
+past newNum(int value)
+{
+	past var = newAstNode();
+	var->nodeType = "intValue";
+	var->ivalue = value;
+	return var;
+}
 
 
 int main(int argc, char **argv)
@@ -755,6 +769,4 @@ int main(int argc, char **argv)
 	rdparser.c
 	If you are going to check, please comment out the following code.
 	*/
-
-
 }
