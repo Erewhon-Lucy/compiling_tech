@@ -1,20 +1,22 @@
 %{
+#include<stdio.h>
+#include<stdlib.h>
 enum yytokentype {
-	EOL = 258,
-	ID = 259,
-	NUMBER = 260,
-	STRING = 261,
-	ASSIGN = 262,
-	CMP = 263,
-	IF = 264,
-	ELSE = 265,
-	WHILE = 266,
-	RETURN = 267,
-	INT = 268,
-	STR = 269,
-	VOID = 270,
-	PRINT = 271,
-	SCAN = 272
+	INT = 258,
+	STR = 259,
+	VOID = 260,
+	ID = 261,
+	IF = 262,
+	ELSE = 263,
+	WHILE = 264,
+	RETURN = 265,
+	PRINT = 266,
+	SCAN = 267,
+	STRING = 268,
+	ASSIGN = 269,
+	CMP = 270,
+	NUMBER = 271,
+	EOL = 272
 };
 
 int yylval;
@@ -29,57 +31,23 @@ identifier (_|{letter})({letter}|{digit}|_)*
 
 %%
 
-if		{return IF;}
-else	{return ELSE;}
-while	{return WHILE;}
-return	{return RETURN;}
-int		{return INT;}
-str 	{return STR;}
-void	{return VOID;}
-print   {return PRINT;}
-scan    {return SCAN;}
-
-
-"+" |
-"-" |
-"*" |
-"/" |
-"%" |
-"," |
-";" |
-"(" |
-")" |
-"=" |
-"{" |
-"}" |
-"[" |
-"]" { return yytext[0]; }
-
-"<"		{return CMP;}
-">" 	{return CMP;}
-"=="	{return CMP;}
-"<="	{return CMP;}
-">="	{return CMP;}
-"!="	{return CMP;}
-
-"+="	{return ASSIGN;}
-"-="	{return ASSIGN;}
-"*="	{return ASSIGN;}
-"/="	{return ASSIGN;}
-"%="	{return ASSIGN;}
-
-{identifier}	{yylval = atoi(yytext);return ID;}
-[0-9]+				{yylval = atoi(yytext);return NUMBER;}
-\"[^"]*\				{
-							char* tem = strdup(yytext + 1);
-							tem[yyleng - 2] = 0;
-							yylval = atoi(tem);
-							free(tem);
-							return STRING;
-						}
-
-
-\n	{ return EOL; }
+"if"		{yylval = atoi(yytext); return IF;}
+"else"	{yylval = atoi(yytext); return ELSE;}
+"while"	{yylval = atoi(yytext); return WHILE;}
+"return"	{yylval = atoi(yytext); return RETURN;}
+"int"		{yylval = atoi(yytext); return INT;}
+"str" 	{yylval = atoi(yytext); return STR;}
+"void"	{yylval = atoi(yytext); return VOID;}
+"print"   {yylval = atoi(yytext); return PRINT;}
+"scan"    {yylval = atoi(yytext); return SCAN;}
+"+"|"-"|"*"|"/"|"%"|","|";"|"("|")"|"{"|"}"|"["|"]" { return yytext[0]; }
+"<"|">"|"=="	{yylval = atoi(yytext); return CMP;}
+"="		{yylval = atoi(yytext); return ASSIGN;}
+{identifier}	{yylval = atoi(yytext); return ID;}
+[0-9]+			{yylval = atoi(yytext);return NUMBER;}
+"\""(.)+"\""    {yylval = atoi(yytext); return STRING;}
+"//"+.*;  
+[\n]	{ return EOL; }
 [ \t] { /* ignore whitespace */ }
 . 	{ printf("Mystery character %c\n", *yytext); }
 

@@ -1,3 +1,4 @@
-int main(void){
-    return;
+int main() {
+    if(a=b)return a+b; 
+    else return;
     }

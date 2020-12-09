@@ -2,23 +2,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum yytokentype
-{
-	EOL = 258,
-	ID = 259,
-	NUMBER = 260,
-	STRING = 261,
-	ASSIGN = 262,
-	CMP = 263,
-	IF = 264,
-	ELSE = 265,
-	WHILE = 266,
-	RETURN = 267,
-	INT = 268,
-	STR = 269,
-	VOID = 270,
-	PRINT = 271,
-	SCAN = 272
+enum yytokentype {
+	INT = 258,
+	STR = 259,
+	VOID = 260,
+	ID = 261,
+	IF = 262,
+	ELSE = 263,
+	WHILE = 264,
+	RETURN = 265,
+	PRINT = 266,
+	SCAN = 267,
+	STRING = 268,
+	ASSIGN = 269,
+	CMP = 270,
+	NUMBER = 271,
+	EOL = 272
 };
 
 extern int yylex();
@@ -73,7 +72,7 @@ void error_occur()
 {
 	if(yylex() != NULL)
 	{
-		printf("Error occur!Please check your file\n");
+		printf("Error occur!Stop checking\n");
 		exit(0);
 	}
 	else
@@ -86,7 +85,13 @@ void error_occur()
 void advance()
 {
 	tok = yylex();
+	while(tok==EOL)
+	{
+		printf("tok:EOL\n");
+		tok = yylex();
+	}
 	printf("tok: %s\n", yytext);
+
 }
 
 // program
@@ -499,7 +504,6 @@ int statement()
 	{
 		expr_statement();
 	}
-	
 }
 
 // statement_list
@@ -723,17 +727,14 @@ loop:
 	}
 }
 
-
 int main(int argc, char **argv)
 {
-	/*rdcheck*/
-
 	openInput(argc, argv);
 	yyin = fpIn;
-	
 	advance();
 	int f = program();
 	closeInput;
 	printf("Finish, it's all right!\n");
 	return 0;
+
 }

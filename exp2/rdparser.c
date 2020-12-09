@@ -4,769 +4,848 @@
 
 enum yytokentype
 {
-	EOL = 258,
-	ID = 259,
-	NUMBER = 260,
-	STRING = 261,
-	ASSIGN = 262,
-	CMP = 263,
-	IF = 264,
-	ELSE = 265,
-	WHILE = 266,
-	RETURN = 267,
-	INT = 268,
-	STR = 269,
-	VOID = 270,
-	PRINT = 271,
-	SCAN = 272
+    INT = 258,
+    STR = 259,
+    VOID = 260,
+    ID = 261,
+    IF = 262,
+    ELSE = 263,
+    WHILE = 264,
+    RETURN = 265,
+    PRINT = 266,
+    SCAN = 267,
+    STRING = 268,
+    ASSIGN = 269,
+    CMP = 270,
+    NUMBER = 271,
+    EOL = 272
 };
 
 extern int yylex();
 extern int yylval;
 extern char *yytext;
-FILE *yyin;
+extern FILE *yyin;
 FILE *fpIn;
-
-int program();
-int external_declaration();
-int decl_or_stmt();
-int declarator_list();
-int intstr_list();
-int initializer();
-int declarator();
-int parameter_list();
-int parameter();
-int type();
-int statement();
-int statement_list();
-int expr_statement();
-int expr();
-int cmp_expr();
-int add_expr();
-int mul_expr();
-int primary_expr();
-int expr_list();
-int id_list();
 
 int tok;
 
-void openInput(int argc, char *argv[])
-{
-	fpIn = NULL;
-	if (argc > 1)
-	{
-		if ((fpIn = fopen(argv[1], "r")) == NULL)
-		{
-			fprintf(stderr, "Error opening input file:  %s", argv[1]);
-		}
-	}
-	else
-		fpIn = stdin;
-}
-
-void closeInput(FILE *in)
-{
-	fclose(in);
-}
-
-void error_occur()
-{
-	printf("Error occur!Please check your file\n");
-	exit(0);
-}
-
 void advance()
 {
-	tok = yylex();
-	printf("tok: %s\n", yytext);
-}
-
-// program
-//     : external_declaration
-//     | program external_declaration
-//     ;
-
-int program()
-{
-	external_declaration();
-	while (yylex() != EOF)
-	{
-		program();
-	}
-	printf("pass!\n");
-}
-
-// external_declaration
-//     : type declarator decl_or_stmt
-//     ;
-
-int external_declaration()
-{
-	type();
-	declarator();
-	decl_or_stmt();
-}
-
-// decl_or_stmt
-//     : '{' statement_list '}'
-//     | '{' '}'
-//     | ',' declarator_list ';'
-//     | ';'
-//     ;
-
-int decl_or_stmt()
-{
-	if (tok == '{' || tok == ',' || tok == ';')
-	{
-		advance();
-		if (tok == '}')
-		{
-			advance();
-		}
-		else if (tok == ',')
-		{
-			advance();
-			declarator_list();
-			if (tok == ';')
-			{
-				advance();
-			}
-			else
-				error_occur();
-		}
-		else if (tok == ';')
-		{
-			advance();
-		}
-		else
-		{
-			statement_list();
-			if (tok == '}')
-			{
-				advance();
-			}
-			else
-				error_occur();
-		}
-	}
-}
-
-// declarator_list
-//     : declarator
-//     | declarator_list ',' declarator
-//     ;
-
-int declarator_list()
-{
-	declarator();
-	while (yylex() != EOL)
-	{
-		if (tok == ',')
-		{
-			advance();
-			declarator();
-		}
-	}
-}
-
-// intstr_list
-//     : initializer
-//     | intstr_list ',' initializer
-//     ;
-
-int instr_list()
-{
-	initializer();
-	while (yylex() != EOL)
-	{
-		if (tok == ',')
-		{
-			advance();
-			initializer();
-		}
-	}
-}
-
-// initializer
-//     : NUMBER
-//     | STRING
-//     ;
-
-int initializer()
-{
-	if (tok == NUMBER)
-	{
-		advance();
-	}
-	else if (tok == STRING)
-	{
-		advance();
-	}
-	else
-	{
-		printf("ERROR: need NUMBER OR STRING\n");
-		error_occur();
-	}
-}
-
-// declarator
-//     : ID
-//     | ID '=' expr
-//     | ID '(' parameter_list ')'
-//     | ID '(' ')'
-//     | ID '[' expr ']'
-//     | ID '[' ']'
-//     | ID '[' expr ']' '=' '{' intstr_list '}'
-//     | ID '[' ']' '=' '{' intstr_list '}'
-//     ;
-
-int declarator()
-{
-	int l = tok;
-	advance();
-	if (tok == EOL)
-	{
-	}
-	else if (tok == '=')
-	{
-		advance();
-		expr();
-	}
-	else if (tok == '(')
-	{
-		advance();
-		if (tok == ')')
-		{
-			advance();
-		}
-		else
-		{
-			parameter_list();
-			advance();
-			if (tok == ')')
-			{
-				advance();
-			}
-			else
-			{
-				error_occur();
-			}
-		}
-	}
-	else if (tok == '[')
-	{
-		advance();
-		if (tok == ']')
-		{
-			advance();
-			if (tok == '=')
-			{
-				advance();
-				if (tok == '{')
-				{
-					advance();
-					instr_list();
-					if (tok == '}')
-					{
-						advance();
-					}
-					else
-					{
-						error_occur();
-					}
-				}
-				else
-				{
-					error_occur();
-				}
-			}
-		}
-		else
-		{
-			expr();
-			advance();
-			if (tok == ']')
-			{
-				advance();
-				if (tok == '=')
-				{
-					advance();
-					if (tok == '{')
-					{
-						advance();
-						instr_list();
-						if (tok == '}')
-						{
-							advance();
-						}
-						else
-						{
-							error_occur();
-						}
-					}
-					else
-					{
-						error_occur();
-					}
-				}
-			}
-		}
-	}
-}
-
-// parameter_list
-//         : parameter
-//         | parameter_list ',' parameter
-//         ;
-
-int parameter_list()
-{
-	parameter();
-	while (yylex() != EOL)
-	{
-		if (tok == ',')
-		{
-			advance();
-			parameter();
-		}
-	}
-}
-
-// parameter
-//         : type ID
-//         ;
-
-int parameter()
-{
-	type();
-	if (tok == ID)
-	{
-		advance();
-	}
-}
-
-// type
-//         : INT
-//         | STR
-//         | VOID
-//         ;
-
-int type()
-{
-	if (tok == INT)
-	{
-		advance();
-	}
-	else if (tok == STR)
-	{
-		advance();
-	}
-	else if (tok == VOID)
-	{
-		advance();
-	}
-	else
-		error_occur();
-}
-
-// statement
-//     : type declarator_list ';'
-//     | '{' statement_list '}'
-//     | expr_statement
-//     | IF '(' expr ')' statement
-//     | IF '(' expr ')' statement ELSE statement
-//     | WHILE '(' expr ')' statement
-//     | RETURN ';'
-//     | RETURN expr ';'
-//     | PRINT ';'
-//     | PRINT expr_list ';'
-//     | SCAN id_list ';'
-//     ;
-
-int statement()
-{
-	if (tok == INT || tok == STR || tok == VOID)
-	{
-		advance();
-		declarator_list();
-		if (tok == ';')
-		{
-			advance();
-		}
-		else
-			error_occur();
-	}
-	else if (tok == '{')
-	{
-		advance();
-		statement_list();
-		if (tok == '}')
-		{
-			advance();
-		}
-		else
-			error_occur();
-	}
-	else if (tok == IF)
-	{
-		advance();
-		if (tok == '(')
-		{
-			advance();
-			expr();
-			if (tok == ')')
-			{
-				advance();
-				statement();
-				if (tok == ELSE)
-				{
-					advance();
-					statement();
-				}
-			}
-		}
-	}
-	else if (tok == WHILE)
-	{
-		advance();
-		if (tok == '(')
-		{
-			advance();
-			expr();
-			if (tok == ')')
-			{
-				advance();
-				statement();
-			}
-		}
-	}
-	else if (tok == RETURN)
-	{
-		advance();
-		if (tok == ';')
-		{
-			advance();
-		}
-		else
-		{
-			expr();
-			if (tok == ';')
-			{
-				advance();
-			}
-			else
-				error_occur();
-		}
-	}
-	else if (tok == PRINT)
-	{
-		advance();
-		if (tok == ';')
-		{
-			advance();
-		}
-		else
-		{
-			expr_list();
-			if (tok == ';')
-			{
-				advance();
-			}
-			else
-				error_occur();
-		}
-	}
-	else if (tok == SCAN)
-	{
-		advance();
-		id_list();
-		if (tok == ';')
-		{
-			advance();
-		}
-		else
-			error_occur();
-	}
-	else
-	{
-		expr_statement();
-	}
-}
-
-// statement_list
-//     : statement
-//     | statement_list statement
-//     ;
-
-int statement_list()
-{
-	statement();
-	while (yylex() != EOL)
-	{
-		statement();
-	}
-}
-
-// expr_statement
-//     : ';'
-//     | expr ';'
-//     ;
-
-int expr_statement()
-{
-	if (tok == ';')
-	{
-		advance();
-	}
-	else
-	{
-		expr();
-		if (tok == ';')
-		{
-			advance();
-		}
-		else
-			error_occur();
-	}
-}
-
-// expr
-//     : cmp_expr
-//     ;
-
-int expr()
-{
-	cmp_expr();
-}
-
-// cmp_expr
-//     : add_expr
-//     | cmp_expr CMP add_expr
-//     ;
-
-int cmp_expr()
-{
-	add_expr();
-	while (tok == CMP)
-	{
-		advance();
-		add_expr();
-	}
-}
-
-// add_expr
-//     : mul_expr
-//     | add_expr '+' mul_expr
-//     | add_expr '-' mul_expr
-//     ;
-int add_expr()
-{
-	mul_expr();
-	while (tok == '+' | tok == '-')
-	{
-		advance();
-		mul_expr();
-	}
-}
-
-// mul_expr
-//     : primary_expr
-//     | mul_expr '*' primary_expr
-//     | mul_expr '/' primary_expr
-//     | mul_expr '%' primary_expr
-//     | '-' primary_expr
-//     ;
-int mul_expr()
-{
-	if (tok == '-')
-	{
-		advance();
-		primary_expr();
-	}
-	else
-	{
-		primary_expr();
-		while (tok == '*' | tok == '/' | tok == '%')
-		{
-			advance();
-			primary_expr();
-		}
-	}
-}
-
-// primary_expr
-//     : ID '(' expr_list ')'
-//     | ID '(' ')'
-//     | '(' expr ')'
-//     | ID
-//     | NUMBER
-//     | STRING
-//     | ID ASSIGN expr
-//     | ID '=' expr
-//     | ID '[' expr ']'
-//     | ID '[' expr ']' '=' expr
-//     ;
-int primary_expr()
-{
-	if (tok == '(')
-	{
-		advance();
-		expr_list();
-		if (tok == ')')
-		{
-			advance();
-		}
-		else
-		{
-			error_occur();
-		}
-	}
-	else if (tok == ID)
-	{
-		advance();
-		if (tok == '(')
-		{
-			advance();
-			if (tok == ')')
-			{
-				advance();
-			}
-			else
-			{
-				expr_list();
-				if (tok == ')')
-				{
-					advance();
-				}
-				else
-				{
-					error_occur();
-				}
-			}
-		}
-		else if (tok == '=')
-		{
-			advance();
-			expr();
-		}
-		else if (tok == '[')
-		{
-			advance();
-			expr();
-			if (tok == ']')
-			{
-				advance();
-				if (tok == '=')
-				{
-					advance();
-					expr();
-				}
-			}
-			else
-			{
-				error_occur();
-			}
-		}
-		else if (tok == ASSIGN)
-		{
-			advance();
-			expr();
-		}
-	}
-	else if (tok == NUMBER)
-	{
-		advance();
-	}
-	else if (tok == STRING)
-	{
-		advance();
-	}
-}
-
-// expr_list
-//     : expr
-//     | expr_list ',' expr
-//     ;
-int expr_list()
-{
-	expr();
-	while (tok == ',')
-	{
-		expr();
-	}
-}
-
-// id_list
-//     : ID
-//     | id_list ',' ID
-//     ;
-int id_list()
-{
-loop:
-	while (tok == ID)
-	{
-		advance();
-		while (tok == ',')
-		{
-			advance();
-			goto loop;
-		}
-	}
+    tok = yylex();
+    while (tok == EOL)
+    {
+        tok = yylex();
+    }
+    printf("tok: %s\n", yytext);
 }
 
 typedef struct _ast ast;
 typedef struct _ast *past;
+
 struct _ast
 {
-	int ivalue;
-	char *nodeType;
-	past left;
-	past right;
+    int ivalue;
+    char *nodeType;
+    past left;
+    past right;
 };
+
+void openInput(int argc, char *argv[]);
+void closeInput(FILE *in);
+void showAst(past node, int nest);
+past astType();
+past astExpr_list();
+past astId_list();
+past astParameter();
+past astIntstr_list();
+past astParameter_list();
+past astDeclarator();
+past astDeclarator_list();
+past astExpression_statement();
+past astStatement();
+past astStatement_list();
+past astDecl_or_stmt();
+past astExternal_declaration();
+past astProgram();
+past astPrimary_expr();
+past astMul_expr();
+past astAdd_expr();
+past astCmp_expr();
+past ast_expr();
+
+void openInput(int argc, char *argv[])
+{
+    fpIn = NULL;
+    if (argc > 1)
+    {
+        if ((fpIn = fopen(argv[1], "r")) == NULL)
+        {
+            fprintf(stderr, "Error opening input file:  %s", argv[1]);
+        }
+    }
+    else
+        fpIn = stdin;
+}
+
+void closeInput(FILE *in)
+{
+    fclose(in);
+}
 
 past newAstNode()
 {
-	past node = malloc(sizeof(ast));
-	if (node == NULL)
-	{
-		printf("run out of memory.\n");
-		exit(0);
-	}
-	memset(node, 0, sizeof(ast));
-	return node;
+    past node = malloc(sizeof(ast));
+    if (node == NULL)
+    {
+        printf("run out of memory.\n");
+        exit(0);
+    }
+    memset(node, 0, sizeof(ast));
+    return node;
 }
 
-past newKey(int value)
-{
-	past var = newAstNode();
-	var->nodeType = "keyWord";
-	var->ivalue = value;
-	return var;
-}
 past newNum(int value)
 {
-	past var = newAstNode();
-	var->nodeType = "intValue";
-	var->ivalue = value;
-	return var;
+    past var = newAstNode();
+    var->nodeType = "intValue";
+    var->ivalue = value;
+    return var;
+}
+past newExpr(int oper, past left, past right)
+{
+    past var = newAstNode();
+    var->nodeType = "expr";
+    var->ivalue = oper;
+    var->left = left;
+    var->right = right;
+    return var;
 }
 
+past newBoth(past left, past right)
+{
+    past var = newAstNode();
+    var->left = left;
+    var->right = right;
+    var->ivalue = -11;
+    var->nodeType = "none";
+    return var;
+}
+
+past newVarRef(int tok, int i)
+{
+    past var = newAstNode();
+    switch (i)
+    {
+    case 1: var->nodeType = "expr"; break;
+    case 2: var->nodeType = "id";break;
+    case 3: var->nodeType = "initializer";break;
+    case 4: var->nodeType = "type";break;
+    case 5: var->nodeType = "if";break;
+    case 6: var->nodeType = "else";break;
+    case 7: var->nodeType = "while";break;
+    case 8: var->nodeType = "return";break;
+    case 9: var->nodeType = "print";break;
+    case 10: var->nodeType = "scan";break;
+    default:
+        break;
+    }
+    var->ivalue = tok;
+    return var;
+}
+
+past newBracket(int oper1, past var, int oper2)
+{
+    if (var == NULL)
+    {
+        var = newAstNode();
+        var->ivalue = -11;
+        var->nodeType = "none";
+    }
+    past var1 = newAstNode();
+    past var2 = newAstNode();
+    var1->nodeType = "expr";
+    var1->ivalue = oper1;
+    var2->nodeType = "expr";
+    var2->ivalue = oper2;
+    past parent1 = newAstNode();
+    parent1->ivalue = -11;
+    parent1->nodeType = "none";
+    parent1->left = var1;
+    parent1->right = var;
+    past parent2 = newAstNode();
+    parent2->ivalue = -11;
+    parent2->nodeType = "none";
+    parent2->left = parent1;
+    parent2->right = var2;
+    return parent2;
+}
+
+past astType()
+{
+    if (tok == INT || tok == STR || tok == VOID)
+    {
+        past l = newVarRef(tok, 4);
+        advance();
+        return l;
+    }
+    else if (tok == 'q')
+    {
+        exit(0);
+    }
+    return NULL;
+}
+
+past astExpr_list()
+{
+    past l = ast_expr();
+    if (l != NULL)
+    {
+        if (tok == ',')
+        {
+            past n = astExpr_list();
+            if (n != NULL)
+            {
+                l = newExpr(',', l, n);
+            }
+        }
+    }
+    return l;
+}
+
+past astId_list()
+{
+    if (tok == ID)
+    {
+        past n = newVarRef(tok, 2);
+        advance();
+        if (tok == ',')
+        {
+            past r = astId_list();
+            if (r != NULL)
+            {
+                n = newExpr(',', n, r);
+            }
+        }
+        return n;
+    }
+    else if (tok == 'q')
+        exit(0);
+    return NULL;
+}
+
+past astParameter()
+{
+    past l = astType();
+    if (l != NULL)
+    {
+        if (tok == ID)
+        {
+            past n = newVarRef(tok, 2);
+            l = newBoth(l, n);
+            advance();
+        }
+    }
+    return l;
+}
+
+past astIntstr_list()
+{
+    if (tok == NUMBER)
+    {
+        past n = newNum(yylval);
+        advance();
+        if (tok == ',')
+        {
+            advance();
+            past r = astIntstr_list();
+            if (r != NULL)
+            {
+                n = newExpr(',', n, r);
+            }
+        }
+        return n;
+    }
+    else if (tok == STRING)
+    {
+        past n = newVarRef(tok, 3);
+        advance();
+        if (tok == ',')
+        {
+            advance();
+            past r = astIntstr_list();
+            if (r != NULL)
+            {
+                n = newExpr(',', n, r);
+            }
+        }
+        return n;
+    }
+    else if (tok == 'q')
+        exit(0);
+    return NULL;
+}
+
+past astParameter_list()
+{
+    past l = astParameter();
+    if (tok == ',')
+    {
+        past n = astParameter_list();
+        if (n != NULL)
+        {
+            l = newExpr(',', l, n);
+        }
+    }
+    return l;
+}
+
+past astDeclarator()
+{
+    if (tok == ID)
+    {
+        past n = newVarRef(tok, 2);
+        advance();
+        if (tok == ASSIGN)
+        {
+            advance();
+            past l = ast_expr();
+            if (l != NULL)
+            {
+                l = newExpr('=', n, l);
+                return l;
+            }
+        }
+        else if (tok == '(')
+        {
+            advance();
+            past l = astParameter_list();
+            if (tok == ')')
+            {
+                l = newBracket('(', l, ')');
+                l = newBoth(n, l);
+                advance();
+                return l;
+            }
+        }
+        else if (tok == '[')
+        {
+            advance();
+            past l = ast_expr();
+            if (tok == ']')
+            {
+                l = newBracket('[', l, ']');
+                l = newBoth(n, l);
+                advance();
+                if (tok == ASSIGN)
+                {
+                    advance();
+                    if (tok == '{')
+                    {
+                        advance();
+                        past n = astIntstr_list();
+                        if (n != NULL)
+                        {
+                            if (tok == '}')
+                            {
+                                n = newBracket('{', n, '}');
+                                l = newExpr('=', l, n);
+                                advance();
+                            }
+                        }
+                    }
+                }
+                return l;
+            }
+        }
+        return n;
+    }
+    return NULL;
+}
+
+past astDeclarator_list()
+{
+    past l = astDeclarator();
+    if (tok == ',')
+    {
+        advance();
+        past n = astDeclarator_list();
+        l = newExpr(',', l, n);
+    }
+    return l;
+}
+
+past astExpression_statement()
+{
+    past l = ast_expr();
+    if (tok == ';')
+    {
+        past n = newVarRef(tok, 1);
+        if (l != NULL)
+        {
+            l = newBoth(n, l);
+            advance();
+            return l;
+        }
+        else
+        {
+            return n;
+        }
+    }
+    return NULL;
+}
+
+past astStatement()
+{
+    past l = astType();
+    if (l != NULL)
+    {
+        past n = astDeclarator_list();
+        if (n != NULL)
+        {
+            if (tok == ';')
+            {
+                past r = newVarRef(';', 1);
+                l = newBoth(l, n);
+                l = newBoth(l, r);
+                advance();
+                return l;
+            }
+        }
+    }
+    l = astExpression_statement();
+    if (l != NULL)
+    {
+        return l;
+    }
+    if (tok == '{')
+    {
+        advance();
+        l = astStatement_list();
+        if (l != NULL)
+        {
+            if (tok == '}')
+            {
+                l = newBracket('{', l, '}');
+                advance();
+                return l;
+            }
+        }
+    }
+    else if (tok == IF)
+    {
+        past r = newVarRef(tok, 5);
+        advance();
+        if (tok == '(')
+        {
+            advance();
+            l = ast_expr();
+            if (l != NULL)
+            {
+                if (tok == ')')
+                {
+                    l = newBracket('(', l, ')');
+                    l = newBoth(r, l);
+                    advance();
+                    past n = astStatement();
+                    if (n != NULL)
+                    {
+                        l = newBoth(n, l);
+                        if (tok == ELSE)
+                        {
+                            r = newVarRef(tok, 6);
+                            advance();
+                            n = astStatement();
+                            if (n != NULL)
+                            {
+                                n = newBoth(r, n);
+                                l = newBoth(l, n);
+                            }
+                        }
+                        return l;
+                    }
+                }
+            }
+        }
+    }
+    else if (tok == WHILE)
+    {
+        past n = newVarRef(tok, 7);
+        advance();
+        if (tok == '(')
+        {
+            advance();
+            past l = ast_expr();
+            if (l != NULL)
+            {
+                if (tok == ')')
+                {
+                    l = newBracket('(', l, ')');
+                    advance();
+                    past r = astStatement();
+                    if (r != NULL)
+                    {
+                        l = newBoth(n, l);
+                        l = newBoth(l, r);
+                        return l;
+                    }
+                }
+            }
+        }
+    }
+    else if (tok == RETURN)
+    {
+        past n = newVarRef(tok, 8);
+        advance();
+        past l = ast_expr();
+        if (l != NULL)
+        {
+            n = newBoth(n, l);
+        }
+        if (tok == ';')
+        {
+            past r = newVarRef(tok, 1);
+            advance();
+            n = newBoth(n, r);
+            return n;
+        }
+    }
+    else if (tok == PRINT)
+    {
+        past n = newVarRef(tok, 3);
+        advance();
+        past l = astExpr_list();
+        if (l != NULL)
+        {
+            n = newBoth(n, l);
+        }
+        if (tok == ';')
+        {
+            past r = newVarRef(tok, 1);
+            advance();
+            n = newBoth(n, r);
+            return n;
+        }
+    }
+    else if (tok == SCAN)
+    {
+        past n = newVarRef(tok, 10);
+        advance();
+        past l = astId_list();
+        if (l != NULL)
+        {
+            if (tok == ';')
+            {
+                past r = newVarRef(tok, 1);
+                advance();
+                l = newBoth(n, l);
+                l = newBoth(l, r);
+                return l;
+            }
+        }
+    }
+    return NULL;
+}
+
+past astStatement_list()
+{
+    past l = astStatement();
+    if (l != NULL)
+    {
+        past n = astStatement();
+        while (n != NULL)
+        {
+            l = newBoth(l, n);
+            n = astStatement_list();
+        }
+    }
+    return l;
+}
+
+past astDecl_or_stmt()
+{
+    if (tok == '{')
+    {
+        advance();
+        past l = astStatement_list();
+        if (tok == '}')
+        {
+            advance();
+            l = newBracket('{', l, '}');
+            return l;
+        }
+    }
+    else if (tok == ',')
+    {
+        past n = newVarRef(tok, 1);
+        advance();
+        past l = astDeclarator_list();
+        if (l != NULL)
+        {
+            if (tok == ';')
+            {
+                past r = newVarRef(tok, 1);
+                advance();
+                l = newBoth(n, l);
+                l = newBoth(l, r);
+                return l;
+            }
+        }
+    }
+    else if (tok == ';')
+    {
+        past l = newVarRef(tok, 1);
+        advance();
+        return l;
+    }
+    return NULL;
+}
+
+past astExternal_declaration()
+{
+    past l = astType();
+    if (l != NULL)
+    {
+        past n = astDeclarator();
+        if (n != NULL)
+        {
+            n = newBoth(l, n);
+            past r = astDecl_or_stmt();
+            if (r != NULL)
+            {
+                l = newBoth(n, r);
+            }
+        }
+    }
+    return l;
+}
+
+past astProgram()
+{
+    past l = astExternal_declaration();
+    if (l != NULL)
+    {
+        past n = astExternal_declaration();
+        while (n != NULL)
+        {
+            l = newBoth(l, n);
+            n = astProgram();
+        }
+    }
+    return l;
+}
+
+past astPrimary_expr()
+{
+    if (tok == ID)
+    {
+        past n = newVarRef(tok, 2);
+        advance();
+        if (tok == '(')
+        {
+            advance();
+            past l = astExpr_list();
+            if (tok == ')')
+            {
+                advance();
+                l = newBracket('(', l, ')');
+                l = newBoth(n, l);
+                return l;
+            }
+        }
+        else if (tok == '[')
+        {
+            advance();
+            past l = ast_expr();
+            if (l != NULL)
+            {
+                if (tok == ']')
+                {
+                    advance();
+                    l = newBracket('[', l, ']');
+                    l = newBoth(n, l);
+                    if (tok == ASSIGN)
+                    {
+                        past r = ast_expr();
+                        if (r != NULL)
+                        {
+                            l = newExpr('=', l, r);
+                        }
+                    }
+                    return l;
+                }
+            }
+        }
+        else if (tok == ASSIGN)
+        {
+            advance();
+            past l = ast_expr();
+            if (l != NULL)
+            {
+                l = newExpr(ASSIGN, n, l);
+                return l;
+            }
+        }
+        return n;
+    }
+    else if (tok == '(')
+    {
+        advance();
+        past l = ast_expr();
+        if (l != NULL)
+        {
+            if (tok == ')')
+            {
+                advance();
+                l = newBracket('(', l, ')');
+                return l;
+            }
+        }
+    }
+    else if (tok == NUMBER)
+    {
+        past n = newNum(yylval);
+        advance();
+        return n;
+    }
+    else if (tok == STRING)
+    {
+        past n = newVarRef(tok, 3);
+        advance();
+        return n;
+    }
+    return NULL;
+}
+
+past astMul_expr()
+{
+    if (tok == '-')
+    {
+        advance();
+        past l = astPrimary_expr();
+        if (l != NULL)
+        {
+            l = newExpr('-', NULL, l);
+            return l;
+        }
+    }
+    else
+    {
+        past l = astPrimary_expr();
+        if (l != NULL)
+        {
+            while (tok == '*' || tok == '/' || tok == '%')
+            {
+                int oper = tok;
+                advance();
+                past r = astPrimary_expr();
+                if (r != NULL)
+                {
+                    l = newExpr(oper, l, r);
+                }
+            }
+        }
+        return l;
+    }
+}
+
+past astAdd_expr()
+{
+    past l = astMul_expr();
+    if (l != NULL)
+    {
+        while (tok == '+' || tok == '-')
+        {
+            int oper = tok;
+            advance();
+            past r = astMul_expr();
+            if (r != NULL)
+            {
+                l = newExpr(oper, l, r);
+            }
+        }
+    }
+    return l;
+}
+
+past astCmp_expr()
+{
+    past l = astAdd_expr();
+    if (l != NULL)
+    {
+        while (tok == CMP)
+        {
+            advance();
+            past r = astAdd_expr();
+            if (r != NULL)
+            {
+                l = newExpr(CMP, l, r);
+            }
+        }
+    }
+    return l;
+}
+
+past ast_expr()
+{
+    past l = astCmp_expr();
+    return l;
+}
+
+void showAst(past node, int nest)
+{
+    if (node == NULL)
+        return;
+
+    if (node->ivalue != -11)
+    {
+        int i = 0;
+        for (i = 0; i < nest; i++)
+            printf("  ");
+
+        if (strcmp(node->nodeType, "expr") == 0)
+        {
+            printf("%s %c\n", node->nodeType, (char)node->ivalue);
+        }
+        else if (strcmp(node->nodeType, "intValue") == 0)
+        {
+            printf("%s %d\n", node->nodeType, node->ivalue);
+        }
+        else
+        {
+            printf("%s ", node->nodeType);
+            switch (node->ivalue)
+            {
+            case 258:printf("INT\n");break;
+            case 259:printf("STR\n");break;
+            case 260:printf("VOID\n");break;
+            case 261:printf("ID\n");break;
+            case 262:printf("IF\n");break;
+            case 263:printf("ELSE\n");break;
+            case 264:printf("WHILE\n");break;
+            case 265:printf("RETURN\n");break;
+            case 266:printf("PRINT\n");break;
+            case 267:printf("SCAN\n");break;
+            case 268:printf("STRING\n");break;
+            case 269:printf("ASSIGN\n");break;
+            case 270:printf("CMP\n");break;
+            case 271:printf("NUMBER\n");break;
+            case 272:printf("EOL\n");break;
+            default:
+                break;
+            }
+        }
+    }
+    showAst(node->left, nest + 1);
+    showAst(node->right, nest + 1);
+}
 
 int main(int argc, char **argv)
 {
-	/*
-	rdcheck.c
-	If you are going to generate AST,please comment out the following code
-	*/
-	openInput(argc, argv);
-	yyin = fpIn;
-	advance();
-	int f = program();
-	closeInput;
-	return 0;
+    openInput(argc, argv);
+    yyin = fpIn;
+    advance();
+    past rr = astProgram();
+    showAst(rr, 0);
 
-	/*
-	rdparser.c
-	If you are going to check, please comment out the following code.
-	*/
+    return 0;
 }
