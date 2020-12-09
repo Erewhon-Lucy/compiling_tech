@@ -88,7 +88,10 @@ void yyerror(char *);
 # define YYERROR_VERBOSE 0
 #endif
 
-
+/* In a future release of Bison, this section will be replaced
+   by #include "calc2.tab.h".  */
+#ifndef YY_YY_CALC2_TAB_H_INCLUDED
+# define YY_YY_CALC2_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -118,11 +121,11 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-
+#endif /* !YY_YY_CALC2_TAB_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 126 "calc2.tab.c" /* yacc.c:358  */
+#line 129 "calc2.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -419,8 +422,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    13,    13,    14,    18,    19,    20,    23,    24,    25,
-      28,    29
+       0,    13,    13,    14,    17,    18,    19,    22,    23,    24,
+      27,    28
 };
 #endif
 
@@ -1195,53 +1198,53 @@ yyreduce:
         case 2:
 #line 13 "calc2.y" /* yacc.c:1646  */
     { printf("%d\n",  (yyvsp[-1])); }
-#line 1199 "calc2.tab.c" /* yacc.c:1646  */
+#line 1202 "calc2.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 18 "calc2.y" /* yacc.c:1646  */
+#line 17 "calc2.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1205 "calc2.tab.c" /* yacc.c:1646  */
+#line 1208 "calc2.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 19 "calc2.y" /* yacc.c:1646  */
+#line 18 "calc2.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[-2]) + (yyvsp[0]);}
-#line 1211 "calc2.tab.c" /* yacc.c:1646  */
+#line 1214 "calc2.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 20 "calc2.y" /* yacc.c:1646  */
+#line 19 "calc2.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[-2]) - (yyvsp[0]);}
-#line 1217 "calc2.tab.c" /* yacc.c:1646  */
+#line 1220 "calc2.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 24 "calc2.y" /* yacc.c:1646  */
+#line 23 "calc2.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[-2]) * (yyvsp[0]);}
-#line 1223 "calc2.tab.c" /* yacc.c:1646  */
+#line 1226 "calc2.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 25 "calc2.y" /* yacc.c:1646  */
+#line 24 "calc2.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[-2]) / (yyvsp[0]);}
-#line 1229 "calc2.tab.c" /* yacc.c:1646  */
+#line 1232 "calc2.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 28 "calc2.y" /* yacc.c:1646  */
+#line 27 "calc2.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1235 "calc2.tab.c" /* yacc.c:1646  */
+#line 1238 "calc2.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 29 "calc2.y" /* yacc.c:1646  */
+#line 28 "calc2.y" /* yacc.c:1646  */
     {(yyval) = -(yyvsp[0]); }
-#line 1241 "calc2.tab.c" /* yacc.c:1646  */
+#line 1244 "calc2.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1245 "calc2.tab.c" /* yacc.c:1646  */
+#line 1248 "calc2.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1469,7 +1472,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 32 "calc2.y" /* yacc.c:1906  */
+#line 31 "calc2.y" /* yacc.c:1906  */
 
 void yyerror(char *s) 
 {

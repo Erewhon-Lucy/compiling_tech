@@ -1,6 +1,7 @@
 %{
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "ast.h"
 int yylex(void);
 void yyerror(char *);
@@ -18,9 +19,9 @@ void yyerror(char *);
 
 %%
 
-program: program expr '\n'      { showAst($2, 0);}
-		|
-		;
+program : program expr '\n'	{showAst($2, 0);}
+        |	{}
+;
 
 expr: factor			  
 	| expr '+' factor     {$$ = newExpr('+', $1, $3);}

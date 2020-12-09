@@ -53,20 +53,21 @@ struct _ast
 void openInput(int argc, char *argv[]);
 void closeInput(FILE *in);
 void showAst(past node, int nest);
+past astProgram();
+past astExternal_declaration();
+past astDecl_or_stmt();
+past astDeclarator_list();
+past astIntstr_list();
+past astInitializer();
+past astDeclarator();
+past astParameter_list();
+past astParameter();
 past astType();
 past astExpr_list();
 past astId_list();
-past astParameter();
-past astIntstr_list();
-past astParameter_list();
-past astDeclarator();
-past astDeclarator_list();
 past astExpression_statement();
 past astStatement();
 past astStatement_list();
-past astDecl_or_stmt();
-past astExternal_declaration();
-past astProgram();
 past astPrimary_expr();
 past astMul_expr();
 past astAdd_expr();
@@ -180,69 +181,89 @@ past newBracket(int oper1, past var, int oper2)
     return parent2;
 }
 
-past astType()
+past astProgram()
 {
-    if (tok == INT || tok == STR || tok == VOID)
-    {
-        past l = newVarRef(tok, 4);
-        advance();
-        return l;
-    }
-    else if (tok == 'q')
-    {
-        exit(0);
-    }
-    return NULL;
-}
-
-past astExpr_list()
-{
-    past l = ast_expr();
+    past l = astExternal_declaration();
     if (l != NULL)
     {
-        if (tok == ',')
+        past n = astExternal_declaration();
+        while (n != NULL)
         {
-            past n = astExpr_list();
-            if (n != NULL)
+            l = newBoth(l, n);
+            n = astProgram();
+        }
+    }
+    return l;
+}
+
+past astExternal_declaration()
+{
+    past l = astType();
+    if (l != NULL)
+    {
+        past n = astDeclarator();
+        if (n != NULL)
+        {
+            n = newBoth(l, n);
+            past r = astDecl_or_stmt();
+            if (r != NULL)
             {
-                l = newExpr(',', l, n);
+                l = newBoth(n, r);
             }
         }
     }
     return l;
 }
 
-past astId_list()
+past astDecl_or_stmt()
 {
-    if (tok == ID)
+    if (tok == '{')
     {
-        past n = newVarRef(tok, 2);
         advance();
-        if (tok == ',')
+        past l = astStatement_list();
+        if (tok == '}')
         {
-            past r = astId_list();
-            if (r != NULL)
+            advance();
+            l = newBracket('{', l, '}');
+            return l;
+        }
+    }
+    else if (tok == ',')
+    {
+        past n = newVarRef(tok, 1);
+        advance();
+        past l = astDeclarator_list();
+        if (l != NULL)
+        {
+            if (tok == ';')
             {
-                n = newExpr(',', n, r);
+                past r = newVarRef(tok, 1);
+                advance();
+                l = newBoth(n, l);
+                l = newBoth(l, r);
+                return l;
             }
         }
-        return n;
     }
-    else if (tok == 'q')
-        exit(0);
+    else if (tok == ';')
+    {
+        past l = newVarRef(tok, 1);
+        advance();
+        return l;
+    }
     return NULL;
 }
 
-past astParameter()
+past astDeclarator_list()
 {
-    past l = astType();
-    if (l != NULL)
+    past l = astDeclarator();
+    if (tok == ',')
     {
-        if (tok == ID)
+        advance();
+        past r = astDeclarator_list();
+        if (r != NULL)
         {
-            past n = newVarRef(tok, 2);
-            l = newBoth(l, n);
-            advance();
+            l = newExpr(',', l, r);
         }
     }
     return l;
@@ -250,53 +271,28 @@ past astParameter()
 
 past astIntstr_list()
 {
-    if (tok == NUMBER)
-    {
-        past n = newNum(yylval);
-        advance();
-        if (tok == ',')
-        {
-            advance();
-            past r = astIntstr_list();
-            if (r != NULL)
-            {
-                n = newExpr(',', n, r);
-            }
-        }
-        return n;
-    }
-    else if (tok == STRING)
-    {
-        past n = newVarRef(tok, 3);
-        advance();
-        if (tok == ',')
-        {
-            advance();
-            past r = astIntstr_list();
-            if (r != NULL)
-            {
-                n = newExpr(',', n, r);
-            }
-        }
-        return n;
-    }
-    else if (tok == 'q')
-        exit(0);
-    return NULL;
-}
-
-past astParameter_list()
-{
-    past l = astParameter();
+    past l = astInitializer();
     if (tok == ',')
     {
-        past n = astParameter_list();
-        if (n != NULL)
+        advance();
+        past r = astIntstr_list();
+        if (r != NULL) 
         {
-            l = newExpr(',', l, n);
+            l = newExpr(',', l, r);
         }
     }
     return l;
+}
+
+past astInitializer()
+{
+    if (tok == NUMBER | tok == STRING)
+    {
+        past l = newVarRef(tok, 3);
+        advance();
+        return l;
+    }
+    return NULL;
 }
 
 past astDeclarator()
@@ -362,34 +358,42 @@ past astDeclarator()
     return NULL;
 }
 
-past astDeclarator_list()
+past astParameter_list()
 {
-    past l = astDeclarator();
+    past l = astParameter();
     if (tok == ',')
     {
-        advance();
-        past n = astDeclarator_list();
-        l = newExpr(',', l, n);
+        past r = astParameter_list();
+        if (r != NULL)
+        {
+            l = newExpr(',', l, r);
+        }
     }
     return l;
 }
 
-past astExpression_statement()
+past astParameter()
 {
-    past l = ast_expr();
-    if (tok == ';')
+    past l = astType();
+    if (l != NULL)
     {
-        past n = newVarRef(tok, 1);
-        if (l != NULL)
+        if (tok == ID)
         {
-            l = newBoth(n, l);
+            past r = newVarRef(tok, 2);
+            l = newBoth(l, r);
             advance();
-            return l;
         }
-        else
-        {
-            return n;
-        }
+    }
+    return l;
+}
+
+past astType()
+{
+    if (tok == INT || tok == STR || tok == VOID)
+    {
+        past l = newVarRef(tok, 4);
+        advance();
+        return l;
     }
     return NULL;
 }
@@ -561,77 +565,99 @@ past astStatement_list()
     return l;
 }
 
-past astDecl_or_stmt()
+past astExpression_statement()
 {
-    if (tok == '{')
-    {
-        advance();
-        past l = astStatement_list();
-        if (tok == '}')
-        {
-            advance();
-            l = newBracket('{', l, '}');
-            return l;
-        }
-    }
-    else if (tok == ',')
+    past l = ast_expr();
+    if (tok == ';')
     {
         past n = newVarRef(tok, 1);
-        advance();
-        past l = astDeclarator_list();
         if (l != NULL)
         {
-            if (tok == ';')
-            {
-                past r = newVarRef(tok, 1);
-                advance();
-                l = newBoth(n, l);
-                l = newBoth(l, r);
-                return l;
-            }
+            l = newBoth(n, l);
+            advance();
+            return l;
         }
-    }
-    else if (tok == ';')
-    {
-        past l = newVarRef(tok, 1);
-        advance();
-        return l;
+        else
+        {
+            return n;
+        }
     }
     return NULL;
 }
 
-past astExternal_declaration()
+past ast_expr()
 {
-    past l = astType();
+    past l = astCmp_expr();
+    return l;
+}
+
+past astCmp_expr()
+{
+    past l = astAdd_expr();
     if (l != NULL)
     {
-        past n = astDeclarator();
-        if (n != NULL)
+        while (tok == CMP)
         {
-            n = newBoth(l, n);
-            past r = astDecl_or_stmt();
+            advance();
+            past r = astAdd_expr();
             if (r != NULL)
             {
-                l = newBoth(n, r);
+                l = newExpr(CMP, l, r);
             }
         }
     }
     return l;
 }
 
-past astProgram()
+past astAdd_expr()
 {
-    past l = astExternal_declaration();
+    past l = astMul_expr();
     if (l != NULL)
     {
-        past n = astExternal_declaration();
-        while (n != NULL)
+        while (tok == '+' || tok == '-')
         {
-            l = newBoth(l, n);
-            n = astProgram();
+            int oper = tok;
+            advance();
+            past r = astMul_expr();
+            if (r != NULL)
+            {
+                l = newExpr(oper, l, r);
+            }
         }
     }
     return l;
+}
+
+past astMul_expr()
+{
+    if (tok == '-')
+    {
+        advance();
+        past l = astPrimary_expr();
+        if (l != NULL)
+        {
+            l = newExpr('-', NULL, l);
+            return l;
+        }
+    }
+    else
+    {
+        past l = astPrimary_expr();
+        if (l != NULL)
+        {
+            while (tok == '*' || tok == '/' || tok == '%')
+            {
+                int oper = tok;
+                advance();
+                past r = astPrimary_expr();
+                if (r != NULL)
+                {
+                    l = newExpr(oper, l, r);
+                }
+            }
+        }
+        return l;
+    }
 }
 
 past astPrimary_expr()
@@ -716,79 +742,40 @@ past astPrimary_expr()
     return NULL;
 }
 
-past astMul_expr()
+past astExpr_list()
 {
-    if (tok == '-')
+    past l = ast_expr();
+    if (l != NULL)
     {
-        advance();
-        past l = astPrimary_expr();
-        if (l != NULL)
+        if (tok == ',')
         {
-            l = newExpr('-', NULL, l);
-            return l;
+            past r = astExpr_list();
+            if (r != NULL)
+            {
+                l = newExpr(',', l, r);
+            }
         }
     }
-    else
+    return l;
+}
+
+past astId_list()
+{
+    if (tok == ID)
     {
-        past l = astPrimary_expr();
-        if (l != NULL)
+        past l = newVarRef(tok, 2);
+        advance();
+        if (tok == ',')
         {
-            while (tok == '*' || tok == '/' || tok == '%')
+            past r = astId_list();
+            if (r != NULL)
             {
-                int oper = tok;
-                advance();
-                past r = astPrimary_expr();
-                if (r != NULL)
-                {
-                    l = newExpr(oper, l, r);
-                }
+                l = newExpr(',', l, r);
             }
         }
         return l;
     }
-}
-
-past astAdd_expr()
-{
-    past l = astMul_expr();
-    if (l != NULL)
-    {
-        while (tok == '+' || tok == '-')
-        {
-            int oper = tok;
-            advance();
-            past r = astMul_expr();
-            if (r != NULL)
-            {
-                l = newExpr(oper, l, r);
-            }
-        }
-    }
-    return l;
-}
-
-past astCmp_expr()
-{
-    past l = astAdd_expr();
-    if (l != NULL)
-    {
-        while (tok == CMP)
-        {
-            advance();
-            past r = astAdd_expr();
-            if (r != NULL)
-            {
-                l = newExpr(CMP, l, r);
-            }
-        }
-    }
-    return l;
-}
-
-past ast_expr()
-{
-    past l = astCmp_expr();
-    return l;
+    return NULL;
 }
 
 void showAst(past node, int nest)

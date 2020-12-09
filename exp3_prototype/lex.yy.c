@@ -442,14 +442,15 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "calc3.l"
 #line 2 "calc3.l"
+#include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
 #include "calc3.tab.h"
 
 
 void yyerror(char *);
-#line 452 "lex.yy.c"
 #line 453 "lex.yy.c"
+#line 454 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -666,10 +667,10 @@ YY_DECL
 		}
 
 	{
-#line 10 "calc3.l"
+#line 11 "calc3.l"
 
 
-#line 673 "lex.yy.c"
+#line 674 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -728,7 +729,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 12 "calc3.l"
+#line 13 "calc3.l"
 {
 			yylval.iValue = atoi(yytext);
 			return NUMBER;
@@ -737,25 +738,25 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 17 "calc3.l"
+#line 18 "calc3.l"
 return *yytext;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 18 "calc3.l"
+#line 19 "calc3.l"
 ; 	/* skip whitespace */
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 19 "calc3.l"
+#line 20 "calc3.l"
 yyerror("invalid character");
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 21 "calc3.l"
+#line 22 "calc3.l"
 ECHO;
 	YY_BREAK
-#line 759 "lex.yy.c"
+#line 760 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1760,7 +1761,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 21 "calc3.l"
+#line 22 "calc3.l"
 
 
 int yywrap(void) 
