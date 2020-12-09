@@ -122,7 +122,7 @@ past newExpr(int oper, past left, past right)
     return var;
 }
 
-past newBoth(past left, past right)
+past newList(past left, past right)
 {
     past var = newAstNode();
     var->left = left;
@@ -189,7 +189,7 @@ past astProgram()
         past n = astExternal_declaration();
         while (n != NULL)
         {
-            l = newBoth(l, n);
+            l = newList(l, n);
             n = astProgram();
         }
     }
@@ -204,11 +204,11 @@ past astExternal_declaration()
         past n = astDeclarator();
         if (n != NULL)
         {
-            n = newBoth(l, n);
+            n = newList(l, n);
             past r = astDecl_or_stmt();
             if (r != NULL)
             {
-                l = newBoth(n, r);
+                l = newList(n, r);
             }
         }
     }
@@ -239,8 +239,8 @@ past astDecl_or_stmt()
             {
                 past r = newVarRef(tok, 1);
                 advance();
-                l = newBoth(n, l);
-                l = newBoth(l, r);
+                l = newList(n, l);
+                l = newList(l, r);
                 return l;
             }
         }
@@ -318,7 +318,7 @@ past astDeclarator()
             if (tok == ')')
             {
                 l = newBracket('(', l, ')');
-                l = newBoth(n, l);
+                l = newList(n, l);
                 advance();
                 return l;
             }
@@ -330,7 +330,7 @@ past astDeclarator()
             if (tok == ']')
             {
                 l = newBracket('[', l, ']');
-                l = newBoth(n, l);
+                l = newList(n, l);
                 advance();
                 if (tok == ASSIGN)
                 {
@@ -380,7 +380,7 @@ past astParameter()
         if (tok == ID)
         {
             past r = newVarRef(tok, 2);
-            l = newBoth(l, r);
+            l = newList(l, r);
             advance();
         }
     }
@@ -409,8 +409,8 @@ past astStatement()
             if (tok == ';')
             {
                 past r = newVarRef(';', 1);
-                l = newBoth(l, n);
-                l = newBoth(l, r);
+                l = newList(l, n);
+                l = newList(l, r);
                 advance();
                 return l;
             }
@@ -448,12 +448,12 @@ past astStatement()
                 if (tok == ')')
                 {
                     l = newBracket('(', l, ')');
-                    l = newBoth(r, l);
+                    l = newList(r, l);
                     advance();
                     past n = astStatement();
                     if (n != NULL)
                     {
-                        l = newBoth(n, l);
+                        l = newList(n, l);
                         if (tok == ELSE)
                         {
                             r = newVarRef(tok, 6);
@@ -461,8 +461,8 @@ past astStatement()
                             n = astStatement();
                             if (n != NULL)
                             {
-                                n = newBoth(r, n);
-                                l = newBoth(l, n);
+                                n = newList(r, n);
+                                l = newList(l, n);
                             }
                         }
                         return l;
@@ -488,8 +488,8 @@ past astStatement()
                     past r = astStatement();
                     if (r != NULL)
                     {
-                        l = newBoth(n, l);
-                        l = newBoth(l, r);
+                        l = newList(n, l);
+                        l = newList(l, r);
                         return l;
                     }
                 }
@@ -503,13 +503,13 @@ past astStatement()
         past l = ast_expr();
         if (l != NULL)
         {
-            n = newBoth(n, l);
+            n = newList(n, l);
         }
         if (tok == ';')
         {
             past r = newVarRef(tok, 1);
             advance();
-            n = newBoth(n, r);
+            n = newList(n, r);
             return n;
         }
     }
@@ -520,13 +520,13 @@ past astStatement()
         past l = astExpr_list();
         if (l != NULL)
         {
-            n = newBoth(n, l);
+            n = newList(n, l);
         }
         if (tok == ';')
         {
             past r = newVarRef(tok, 1);
             advance();
-            n = newBoth(n, r);
+            n = newList(n, r);
             return n;
         }
     }
@@ -541,8 +541,8 @@ past astStatement()
             {
                 past r = newVarRef(tok, 1);
                 advance();
-                l = newBoth(n, l);
-                l = newBoth(l, r);
+                l = newList(n, l);
+                l = newList(l, r);
                 return l;
             }
         }
@@ -558,7 +558,7 @@ past astStatement_list()
         past n = astStatement();
         while (n != NULL)
         {
-            l = newBoth(l, n);
+            l = newList(l, n);
             n = astStatement_list();
         }
     }
@@ -573,7 +573,7 @@ past astExpression_statement()
         past n = newVarRef(tok, 1);
         if (l != NULL)
         {
-            l = newBoth(n, l);
+            l = newList(n, l);
             advance();
             return l;
         }
@@ -674,7 +674,7 @@ past astPrimary_expr()
             {
                 advance();
                 l = newBracket('(', l, ')');
-                l = newBoth(n, l);
+                l = newList(n, l);
                 return l;
             }
         }
@@ -688,7 +688,7 @@ past astPrimary_expr()
                 {
                     advance();
                     l = newBracket('[', l, ']');
-                    l = newBoth(n, l);
+                    l = newList(n, l);
                     if (tok == ASSIGN)
                     {
                         past r = ast_expr();

@@ -70,7 +70,7 @@ void closeInput(FILE *in)
 
 void error_occur()
 {
-	if(yylex() != NULL)
+	if (yylex() != NULL)
 	{
 		printf("Error occur!Stop checking\n");
 		exit(0);
@@ -80,6 +80,7 @@ void error_occur()
 		printf("Finish, it's all right!\n");
 		exit(0);
 	}
+		
 }
 
 void advance()
@@ -91,7 +92,6 @@ void advance()
 		tok = yylex();
 	}
 	printf("tok: %s\n", yytext);
-
 }
 
 // program
@@ -102,11 +102,11 @@ void advance()
 int program()
 {
 	external_declaration();
-	while (yylex() != EOF)
+	while (tok != EOF)
 	{
-		program();
+		external_declaration();
 	}
-	printf("pass!\n");
+	exit(0);
 }
 
 // external_declaration
@@ -162,6 +162,8 @@ int decl_or_stmt()
 				error_occur();
 		}
 	}
+	// printf("finish\n");
+	// exit(0);
 }
 
 // declarator_list
@@ -217,7 +219,6 @@ int initializer()
 	}
 	else
 	{
-		printf("ERROR: need NUMBER OR STRING\n");
 		error_occur();
 	}
 }
@@ -232,29 +233,22 @@ int initializer()
 //     | ID '[' expr ']' '=' '{' intstr_list '}'
 //     | ID '[' ']' '=' '{' intstr_list '}'
 //     ;
-
 int declarator()
 {
-	int l = tok;
-	advance();
-	if (tok == EOL)
-	{
-	}
-	else if (tok == '=')
+	if (tok == ID)
 	{
 		advance();
-		expr();
-	}
-	else if (tok == '(')
-	{
-		advance();
-		if (tok == ')')
+		if (tok == EOL)
 		{
 			advance();
 		}
-		else
+		else if (tok == '=')
 		{
-			parameter_list();
+			advance();
+			expr();
+		}
+		else if (tok == '(')
+		{
 			advance();
 			if (tok == ')')
 			{
@@ -262,31 +256,10 @@ int declarator()
 			}
 			else
 			{
-				error_occur();
-			}
-		}
-	}
-	else if (tok == '[')
-	{
-		advance();
-		if (tok == ']')
-		{
-			advance();
-			if (tok == '=')
-			{
-				advance();
-				if (tok == '{')
+				parameter_list();
+				if (tok == ')')
 				{
 					advance();
-					instr_list();
-					if (tok == '}')
-					{
-						advance();
-					}
-					else
-					{
-						error_occur();
-					}
 				}
 				else
 				{
@@ -294,9 +267,8 @@ int declarator()
 				}
 			}
 		}
-		else
+		else if (tok == '[')
 		{
-			expr();
 			advance();
 			if (tok == ']')
 			{
@@ -320,6 +292,36 @@ int declarator()
 					else
 					{
 						error_occur();
+					}
+				}
+			}
+			else
+			{
+				expr();
+				advance();
+				if (tok == ']')
+				{
+					advance();
+					if (tok == '=')
+					{
+						advance();
+						if (tok == '{')
+						{
+							advance();
+							instr_list();
+							if (tok == '}')
+							{
+								advance();
+							}
+							else
+							{
+								error_occur();
+							}
+						}
+						else
+						{
+							error_occur();
+						}
 					}
 				}
 			}
@@ -406,8 +408,6 @@ int statement()
 		{
 			advance();
 		}
-		else
-			error_occur();
 	}
 	else if (tok == '{')
 	{
@@ -559,12 +559,13 @@ int expr()
 
 int cmp_expr()
 {
-	add_expr();
+	int t = add_expr();
 	while (tok == CMP)
 	{
 		advance();
-		add_expr();
+		t = add_expr();
 	}
+	return t;
 }
 
 // add_expr
@@ -574,12 +575,22 @@ int cmp_expr()
 //     ;
 int add_expr()
 {
-	mul_expr();
+	int t = mul_expr();
 	while (tok == '+' | tok == '-')
 	{
-		advance();
-		mul_expr();
+		int ntok = tok;
+        if (ntok == '+')
+        {
+            advance();
+            t = mul_expr();
+        }
+        else if (ntok == '-')
+        {
+            advance();
+            t = mul_expr();
+        }
 	}
+	return t;
 }
 
 // mul_expr
@@ -591,20 +602,36 @@ int add_expr()
 //     ;
 int mul_expr()
 {
+	int t;
 	if (tok == '-')
 	{
 		advance();
-		primary_expr();
+		t = primary_expr();
 	}
 	else
 	{
-		primary_expr();
+		t = primary_expr();
 		while (tok == '*' | tok == '/' | tok == '%')
 		{
-			advance();
-			primary_expr();
+			int ntok = tok;
+			if (ntok == '*')
+			{
+				advance();
+				t = primary_expr();
+			}
+			else if (ntok == '/')
+			{
+				advance();
+				t = primary_expr();
+			}
+			else if (ntok == '%')
+			{
+				advance();
+				t = primary_expr();
+			}
 		}
 	}
+	return t;
 }
 
 // primary_expr
@@ -716,10 +743,10 @@ int expr_list()
 int id_list()
 {
 loop:
-	while (tok == ID)
+	if (tok == ID)
 	{
 		advance();
-		while (tok == ',')
+		if (tok == ',')
 		{
 			advance();
 			goto loop;
@@ -736,5 +763,4 @@ int main(int argc, char **argv)
 	closeInput;
 	printf("Finish, it's all right!\n");
 	return 0;
-
 }

@@ -1,5 +1,5 @@
 
-int a = 33, b, c = 44;
+int a =33, b, c = 44;
 int bb = 3;
 str aaa = "12345", bbb;
 

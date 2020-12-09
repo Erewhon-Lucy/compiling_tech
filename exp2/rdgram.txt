@@ -77,7 +77,7 @@ statement_list
     ;
 
 
-expr_statement
+expression_statement
     : ';'
     | expr ';'
     ;
