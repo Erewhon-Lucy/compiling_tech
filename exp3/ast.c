@@ -48,3 +48,41 @@ void showAst(past node, int nest)
     showAst(node->right, nest + 1);
 }
 
+past newAstNode()
+{
+    past node = malloc(sizeof(ast));
+    if (node == NULL)
+    {
+        printf("run out of memory.\n");
+        exit(0);
+    }
+    memset(node, 0, sizeof(ast));
+    return node;
+}
+
+past newNum(int value)
+{
+    past var = newAstNode();
+    var->nodeType = "intValue";
+    var->ivalue = value;
+    return var;
+}
+past newExpr(int oper, past left, past right)
+{
+    past var = newAstNode();
+    var->nodeType = "expr";
+    var->ivalue = oper;
+    var->left = left;
+    var->right = right;
+    return var;
+}
+
+past newList(past left, past right)
+{
+    past var = newAstNode();
+    var->left = left;
+    var->right = right;
+    var->ivalue = -11;
+    var->nodeType = "none";
+    return var;
+}
