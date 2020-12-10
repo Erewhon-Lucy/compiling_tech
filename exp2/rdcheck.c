@@ -129,25 +129,10 @@ int external_declaration()
 
 int decl_or_stmt()
 {
-	if (tok == '{' || tok == ',' || tok == ';')
+	if (tok == '{')
 	{
 		advance();
 		if (tok == '}')
-		{
-			advance();
-		}
-		else if (tok == ',')
-		{
-			advance();
-			declarator_list();
-			if (tok == ';')
-			{
-				advance();
-			}
-			else
-				error_occur();
-		}
-		else if (tok == ';')
 		{
 			advance();
 		}
@@ -159,11 +144,28 @@ int decl_or_stmt()
 				advance();
 			}
 			else
+			{
 				error_occur();
+			}
 		}
 	}
-	// printf("finish\n");
-	// exit(0);
+	else if (tok == ',')
+	{
+		advance();
+		declarator_list();
+		if (tok == ';')
+		{
+			advance();
+		}
+		else
+		{
+			error_occur();
+		}
+	}
+	else if (tok == ';')
+	{
+		advance();
+	}
 }
 
 // declarator_list

@@ -12,7 +12,7 @@ str f()
 }
 
 
-int func1(int fir, int sec)
+int func1(int fir,int sec)
 {
 	int b = fir*sec + 3000;
 	int a = 10;

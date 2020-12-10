@@ -3,5 +3,3 @@ int main() {
     else return ; 
 }
 str fff;
-while(a=b)
-    a+b;

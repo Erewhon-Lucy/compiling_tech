@@ -1,3 +1,13 @@
+/*
+ ============================================================================
+ Name        : rdparser.c
+ Author      :
+ Version     :
+ Copyright   : Your copyright notice
+ Description : Hello World in C, Ansi-style
+ ============================================================================
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,7 +35,6 @@ extern int yylex();
 extern int yylval;
 extern char *yytext;
 extern FILE *yyin;
-FILE *fpIn;
 
 int tok;
 
@@ -50,48 +59,32 @@ struct _ast
     past right;
 };
 
-void openInput(int argc, char *argv[]);
-void closeInput(FILE *in);
-void showAst(past node, int nest);
-past astProgram();
-past astExternal_declaration();
-past astDecl_or_stmt();
-past astDeclarator_list();
-past astIntstr_list();
-past astInitializer();
-past astDeclarator();
-past astParameter_list();
-past astParameter();
+past newAstNode();
+past newNum(int value);
+past newExpr(int oper, past left, past right);
+past newBoth(past left, past right);
+past newVarRef(int tok, int i);
+past newBracket(int oper1, past var, int oper2);
 past astType();
 past astExpr_list();
 past astId_list();
+past astParameter();
+past astIntstr_list();
+past astParameter_list();
+past astDeclarator();
+past astDeclarator_list();
 past astExpression_statement();
 past astStatement();
 past astStatement_list();
+past astDecl_or_stmt();
+past astExternal_declaration();
+past astProgram();
 past astPrimary_expr();
 past astMul_expr();
 past astAdd_expr();
 past astCmp_expr();
 past ast_expr();
-
-void openInput(int argc, char *argv[])
-{
-    fpIn = NULL;
-    if (argc > 1)
-    {
-        if ((fpIn = fopen(argv[1], "r")) == NULL)
-        {
-            fprintf(stderr, "Error opening input file:  %s", argv[1]);
-        }
-    }
-    else
-        fpIn = stdin;
-}
-
-void closeInput(FILE *in)
-{
-    fclose(in);
-}
+void showAst(past node, int nest);
 
 past newAstNode()
 {
@@ -122,7 +115,7 @@ past newExpr(int oper, past left, past right)
     return var;
 }
 
-past newList(past left, past right)
+past newBoth(past left, past right)
 {
     past var = newAstNode();
     var->left = left;
@@ -135,20 +128,45 @@ past newList(past left, past right)
 past newVarRef(int tok, int i)
 {
     past var = newAstNode();
-    switch (i)
+    if (i == 1)
     {
-    case 1: var->nodeType = "expr"; break;
-    case 2: var->nodeType = "id";break;
-    case 3: var->nodeType = "initializer";break;
-    case 4: var->nodeType = "type";break;
-    case 5: var->nodeType = "if";break;
-    case 6: var->nodeType = "else";break;
-    case 7: var->nodeType = "while";break;
-    case 8: var->nodeType = "return";break;
-    case 9: var->nodeType = "print";break;
-    case 10: var->nodeType = "scan";break;
-    default:
-        break;
+        var->nodeType = "expr";
+    }
+    else if (i == 2)
+    {
+        var->nodeType = "id";
+    }
+    else if (i == 3)
+    {
+        var->nodeType = "initializer";
+    }
+    else if (i == 4)
+    {
+        var->nodeType = "type";
+    }
+    else if (i == 5)
+    {
+        var->nodeType = "if";
+    }
+    else if (i == 6)
+    {
+        var->nodeType = "else";
+    }
+    else if (i == 7)
+    {
+        var->nodeType = "while";
+    }
+    else if (i == 8)
+    {
+        var->nodeType = "return";
+    }
+    else if (i == 9)
+    {
+        var->nodeType = "print";
+    }
+    else if (i == 10)
+    {
+        var->nodeType = "scan";
     }
     var->ivalue = tok;
     return var;
@@ -181,95 +199,71 @@ past newBracket(int oper1, past var, int oper2)
     return parent2;
 }
 
-past astProgram()
+past astType()
 {
-    past l = astExternal_declaration();
-    if (l != NULL)
+    if (tok == INT || tok == STR || tok == VOID)
     {
-        past n = astExternal_declaration();
-        while (n != NULL)
-        {
-            l = newList(l, n);
-            n = astProgram();
-        }
-    }
-    return l;
-}
-
-past astExternal_declaration()
-{
-    past l = astType();
-    if (l != NULL)
-    {
-        past n = astDeclarator();
-        if (n != NULL)
-        {
-            n = newList(l, n);
-            past r = astDecl_or_stmt();
-            if (r != NULL)
-            {
-                l = newList(n, r);
-            }
-        }
-    }
-    return l;
-}
-
-past astDecl_or_stmt()
-{
-    if (tok == '{')
-    {
-        past n = newVarRef(tok,1);
-        advance();
-        if (tok == '}')
-        {
-            advance();
-        }
-        else
-        {
-            past l = astStatement_list();
-            advance();
-            l = newBracket('{', l, '}');
-            return l;
-        }
-    }
-    else if (tok == ',')
-    {
-        past n = newVarRef(tok, 1);
-        advance();
-        past l = astDeclarator_list();
-        if (l != NULL)
-        {
-            if (tok == ';')
-            {
-                past r = newVarRef(tok, 1);
-                advance();
-                l = newList(n, l);
-                l = newList(l, r);
-                return l;
-            }
-        }
-    }
-    else if (tok == ';')
-    {
-        past l = newVarRef(tok, 1);
+        past l = newVarRef(tok, 4);
         advance();
         return l;
     }
+    else if (tok == 'q')
+    {
+        exit(0);
+    }
+    //printf("ccccc\n");
     return NULL;
 }
 
-past astDeclarator_list()
+past astExpr_list()
 {
-    past l = astDeclarator();
-    if (tok == ',')
+    past l = ast_expr();
+    if (l != NULL)
     {
-
-        advance();
-        past r = astDeclarator_list();
-        if (r != NULL)
+        if (tok == ',')
         {
-            l = newExpr(',', l, r);
+            past n = astExpr_list();
+            if (n != NULL)
+            {
+                l = newExpr(',', l, n);
+            }
+        }
+    }
+    return l;
+}
+
+past astId_list()
+{
+    if (tok == ID)
+    {
+        past n = newVarRef(tok, 2);
+        advance();
+        if (tok == ',')
+        {
+            past r = astId_list();
+            if (r != NULL)
+            {
+                n = newExpr(',', n, r);
+            }
+        }
+        return n;
+    }
+    else if (tok == 'q')
+        exit(0);
+    return NULL;
+}
+
+past astParameter()
+{
+    past l = astType();
+    //printf("bbbbb\n");
+    if (l != NULL)
+    {
+        if (tok == ID)
+        {
+            past n = newVarRef(tok, 2);
+            l = newBoth(l, n);
+            advance();
         }
     }
     return l;
@@ -277,28 +271,53 @@ past astDeclarator_list()
 
 past astIntstr_list()
 {
-    past l = astInitializer();
+    if (tok == NUMBER)
+    {
+        past n = newNum(yylval);
+        advance();
+        if (tok == ',')
+        {
+            advance();
+            past r = astIntstr_list();
+            if (r != NULL)
+            {
+                n = newExpr(',', n, r);
+            }
+        }
+        return n;
+    }
+    else if (tok == STRING)
+    {
+        past n = newVarRef(tok, 3);
+        advance();
+        if (tok == ',')
+        {
+            advance();
+            past r = astIntstr_list();
+            if (r != NULL)
+            {
+                n = newExpr(',', n, r);
+            }
+        }
+        return n;
+    }
+    else if (tok == 'q')
+        exit(0);
+    return NULL;
+}
+
+past astParameter_list()
+{
+    past l = astParameter();
     if (tok == ',')
     {
-        advance();
-        past r = astIntstr_list();
-        if (r != NULL) 
+        past n = astParameter_list();
+        if (n != NULL)
         {
-            l = newExpr(',', l, r);
+            l = newExpr(',', l, n);
         }
     }
     return l;
-}
-
-past astInitializer()
-{
-    if (tok == NUMBER | tok == STRING)
-    {
-        past l = newVarRef(tok, 3);
-        advance();
-        return l;
-    }
-    return NULL;
 }
 
 past astDeclarator()
@@ -324,7 +343,7 @@ past astDeclarator()
             if (tok == ')')
             {
                 l = newBracket('(', l, ')');
-                l = newList(n, l);
+                l = newBoth(n, l);
                 advance();
                 return l;
             }
@@ -336,7 +355,7 @@ past astDeclarator()
             if (tok == ']')
             {
                 l = newBracket('[', l, ']');
-                l = newList(n, l);
+                l = newBoth(n, l);
                 advance();
                 if (tok == ASSIGN)
                 {
@@ -364,49 +383,61 @@ past astDeclarator()
     return NULL;
 }
 
-past astParameter_list()
+past astDeclarator_list()
 {
-    past l = astParameter();
+    past l = astDeclarator();
     if (tok == ',')
     {
-        past r = astParameter_list();
-        if (r != NULL)
-        {
-            l = newExpr(',', l, r);
-        }
-    }
-    return l;
-}
-
-past astParameter()
-{
-    past l = astType();
-    if (l != NULL)
-    {
-        if (tok == ID)
-        {
-            past r = newVarRef(tok, 2);
-            l = newList(l, r);
-            advance();
-        }
-    }
-    return l;
-}
-
-past astType()
-{
-    if (tok == INT || tok == STR || tok == VOID)
-    {
-        past l = newVarRef(tok, 4);
         advance();
-        return l;
+        past n = astDeclarator_list();
+        l = newExpr(',', l, n);
+    }
+    return l;
+}
+
+past astExpression_statement()
+{
+    past l = ast_expr();
+    if (tok == ';')
+    {
+        past n = newVarRef(tok, 1);
+        if (l != NULL)
+        {
+            l = newBoth(n, l);
+            advance();
+            return l;
+        }
+        else
+        {
+            return n;
+        }
     }
     return NULL;
 }
 
 past astStatement()
 {
-    past l;
+    past l = astType();
+    if (l != NULL)
+    {
+        past n = astDeclarator_list();
+        if (n != NULL)
+        {
+            if (tok == ';')
+            {
+                past r = newVarRef(';', 1);
+                l = newBoth(l, n);
+                l = newBoth(l, r);
+                advance();
+                return l;
+            }
+        }
+    }
+    l = astExpression_statement();
+    if (l != NULL)
+    {
+        return l;
+    }
     if (tok == '{')
     {
         advance();
@@ -434,12 +465,12 @@ past astStatement()
                 if (tok == ')')
                 {
                     l = newBracket('(', l, ')');
-                    l = newList(r, l);
+                    l = newBoth(r, l);
                     advance();
                     past n = astStatement();
                     if (n != NULL)
                     {
-                        l = newList(n, l);
+                        l = newBoth(n, l);
                         if (tok == ELSE)
                         {
                             r = newVarRef(tok, 6);
@@ -447,8 +478,8 @@ past astStatement()
                             n = astStatement();
                             if (n != NULL)
                             {
-                                n = newList(r, n);
-                                l = newList(l, n);
+                                n = newBoth(r, n);
+                                l = newBoth(l, n);
                             }
                         }
                         return l;
@@ -474,8 +505,8 @@ past astStatement()
                     past r = astStatement();
                     if (r != NULL)
                     {
-                        l = newList(n, l);
-                        l = newList(l, r);
+                        l = newBoth(n, l);
+                        l = newBoth(l, r);
                         return l;
                     }
                 }
@@ -489,13 +520,13 @@ past astStatement()
         past l = ast_expr();
         if (l != NULL)
         {
-            n = newList(n, l);
+            n = newBoth(n, l);
         }
         if (tok == ';')
         {
             past r = newVarRef(tok, 1);
             advance();
-            n = newList(n, r);
+            n = newBoth(n, r);
             return n;
         }
     }
@@ -506,13 +537,13 @@ past astStatement()
         past l = astExpr_list();
         if (l != NULL)
         {
-            n = newList(n, l);
+            n = newBoth(n, l);
         }
         if (tok == ';')
         {
             past r = newVarRef(tok, 1);
             advance();
-            n = newList(n, r);
+            n = newBoth(n, r);
             return n;
         }
     }
@@ -527,32 +558,11 @@ past astStatement()
             {
                 past r = newVarRef(tok, 1);
                 advance();
-                l = newList(n, l);
-                l = newList(l, r);
+                l = newBoth(n, l);
+                l = newBoth(l, r);
                 return l;
             }
         }
-    }
-    l = astType();
-    if (l != NULL)
-    {
-        past n = astDeclarator_list();
-        if (n != NULL)
-        {
-            if (tok == ';')
-            {
-                past r = newVarRef(';', 1);
-                l = newList(l, n);
-                l = newList(l, r);
-                advance();
-                return l;
-            }
-        }
-    }
-    l = astExpression_statement();
-    if (l != NULL)
-    {
-        return l;
     }
     return NULL;
 }
@@ -565,129 +575,84 @@ past astStatement_list()
         past n = astStatement();
         while (n != NULL)
         {
-            l = newList(l, n);
+            l = newBoth(l, n);
             n = astStatement_list();
         }
     }
     return l;
 }
 
-past astExpression_statement()
+past astDecl_or_stmt()
 {
-    // past l = ast_expr();
-    // if (tok == ';')
-    // {
-    //     past n = newVarRef(tok, 1);
-    //     if (l != NULL)
-    //     {
-    //         l = newList(n, l);
-    //         advance();
-    //         return l;
-    //     }
-    //     else
-    //     {
-    //         return n;
-    //     }
-    // }
-    if (tok == ';')
+    if (tok == '{')
     {
-        past r = newVarRef(tok, 1);
         advance();
-    }
-    else
-    {
-        past l = ast_expr();
-        if (tok == ';')
+        past l = astStatement_list();
+        if (tok == '}')
         {
-            past n = newVarRef(tok, 1);
-            if (l != NULL)
+            advance();
+            l = newBracket('{', l, '}');
+            return l;
+        }
+    }
+    else if (tok == ',')
+    {
+        past n = newVarRef(tok, 1);
+        advance();
+        past l = astDeclarator_list();
+        if (l != NULL)
+        {
+            if (tok == ';')
             {
-                l = newList(n, l);
+                past r = newVarRef(tok, 1);
                 advance();
+                l = newBoth(n, l);
+                l = newBoth(l, r);
                 return l;
             }
-            else
-            {
-                return n;
-            }
         }
+    }
+    else if (tok == ';')
+    {
+        past l = newVarRef(tok, 1);
+        advance();
+        return l;
     }
     return NULL;
 }
 
-past ast_expr()
+past astExternal_declaration()
 {
-    past l = astCmp_expr();
-    return l;
-}
-
-past astCmp_expr()
-{
-    past l = astAdd_expr();
+    past l = astType();
     if (l != NULL)
     {
-        while (tok == CMP)
+        past n = astDeclarator();
+        if (n != NULL)
         {
-            advance();
-            past r = astAdd_expr();
+            n = newBoth(l, n);
+            past r = astDecl_or_stmt();
             if (r != NULL)
             {
-                l = newExpr(CMP, l, r);
+                l = newBoth(n, r);
             }
         }
     }
     return l;
 }
 
-past astAdd_expr()
+past astProgram()
 {
-    past l = astMul_expr();
+    past l = astExternal_declaration();
     if (l != NULL)
     {
-        while (tok == '+' || tok == '-')
+        past n = astExternal_declaration();
+        while (n != NULL)
         {
-            int oper = tok;
-            advance();
-            past r = astMul_expr();
-            if (r != NULL)
-            {
-                l = newExpr(oper, l, r);
-            }
+            l = newBoth(l, n);
+            n = astProgram();
         }
     }
     return l;
-}
-
-past astMul_expr()
-{
-    if (tok == '-')
-    {
-        advance();
-        past l = astPrimary_expr();
-        if (l != NULL)
-        {
-            l = newExpr('-', NULL, l);
-            return l;
-        }
-    }
-    else
-    {
-        past l = astPrimary_expr();
-        if (l != NULL)
-        {
-            while (tok == '*' || tok == '/' || tok == '%')
-            {
-                int oper = tok;
-                advance();
-                past r = astPrimary_expr();
-                if (r != NULL)
-                {
-                    l = newExpr(oper, l, r);
-                }
-            }
-        }
-        return l;
-    }
 }
 
 past astPrimary_expr()
@@ -704,7 +669,7 @@ past astPrimary_expr()
             {
                 advance();
                 l = newBracket('(', l, ')');
-                l = newList(n, l);
+                l = newBoth(n, l);
                 return l;
             }
         }
@@ -718,7 +683,7 @@ past astPrimary_expr()
                 {
                     advance();
                     l = newBracket('[', l, ']');
-                    l = newList(n, l);
+                    l = newBoth(n, l);
                     if (tok == ASSIGN)
                     {
                         past r = ast_expr();
@@ -772,40 +737,79 @@ past astPrimary_expr()
     return NULL;
 }
 
-past astExpr_list()
+past astMul_expr()
 {
-    past l = ast_expr();
+    if (tok == '-')
+    {
+        advance();
+        past l = astPrimary_expr();
+        if (l != NULL)
+        {
+            l = newExpr('-', NULL, l);
+            return l;
+        }
+    }
+    else
+    {
+        past l = astPrimary_expr();
+        if (l != NULL)
+        {
+            while (tok == '*' || tok == '/' || tok == '%')
+            {
+                int oper = tok;
+                advance();
+                past r = astPrimary_expr();
+                if (r != NULL)
+                {
+                    l = newExpr(oper, l, r);
+                }
+            }
+        }
+        return l;
+    }
+}
+
+past astAdd_expr()
+{
+    past l = astMul_expr();
     if (l != NULL)
     {
-        if (tok == ',')
+        while (tok == '+' || tok == '-')
         {
-            past r = astExpr_list();
+            int oper = tok;
+            advance();
+            past r = astMul_expr();
             if (r != NULL)
             {
-                l = newExpr(',', l, r);
+                l = newExpr(oper, l, r);
             }
         }
     }
     return l;
 }
 
-past astId_list()
+past astCmp_expr()
 {
-    if (tok == ID)
+    past l = astAdd_expr();
+    if (l != NULL)
     {
-        past l = newVarRef(tok, 2);
-        advance();
-        if (tok == ',')
+        while (tok == CMP)
         {
-            past r = astId_list();
+            advance();
+            past r = astAdd_expr();
             if (r != NULL)
             {
-                l = newExpr(',', l, r);
+                l = newExpr(CMP, l, r);
             }
         }
-        return l;
     }
-    return NULL;
+    return l;
+}
+
+past ast_expr()
+{
+    past l = astCmp_expr();
+    return l;
 }
 
 void showAst(past node, int nest)
@@ -821,7 +825,7 @@ void showAst(past node, int nest)
 
         if (strcmp(node->nodeType, "expr") == 0)
         {
-            printf("%s %c\n", node->nodeType, (char)node->ivalue);
+            printf("%s '%c'\n", node->nodeType, (char)node->ivalue);
         }
         else if (strcmp(node->nodeType, "intValue") == 0)
         {
@@ -830,25 +834,61 @@ void showAst(past node, int nest)
         else
         {
             printf("%s ", node->nodeType);
-            switch (node->ivalue)
+            if (node->ivalue == 258)
             {
-            case 258:printf("INT\n");break;
-            case 259:printf("STR\n");break;
-            case 260:printf("VOID\n");break;
-            case 261:printf("ID\n");break;
-            case 262:printf("IF\n");break;
-            case 263:printf("ELSE\n");break;
-            case 264:printf("WHILE\n");break;
-            case 265:printf("RETURN\n");break;
-            case 266:printf("PRINT\n");break;
-            case 267:printf("SCAN\n");break;
-            case 268:printf("STRING\n");break;
-            case 269:printf("ASSIGN\n");break;
-            case 270:printf("CMP\n");break;
-            case 271:printf("NUMBER\n");break;
-            case 272:printf("EOL\n");break;
-            default:
-                break;
+                printf("INT\n");
+            }
+            else if (node->ivalue == 259)
+            {
+                printf("STR\n");
+            }
+            else if (node->ivalue == 260)
+            {
+                printf("VOID\n");
+            }
+            else if (node->ivalue == 261)
+            {
+                printf("ID\n");
+            }
+            else if (node->ivalue == 262)
+            {
+                printf("IF\n");
+            }
+            else if (node->ivalue == 263)
+            {
+                printf("ELSE\n");
+            }
+            else if (node->ivalue == 264)
+            {
+                printf("WHILE\n");
+            }
+            else if (node->ivalue == 265)
+            {
+                printf("RETURN\n");
+            }
+            else if (node->ivalue == 266)
+            {
+                printf("PRINT\n");
+            }
+            else if (node->ivalue == 267)
+            {
+                printf("SCAN\n");
+            }
+            else if (node->ivalue == 268)
+            {
+                printf("STRING\n");
+            }
+            else if (node->ivalue == 268)
+            {
+                printf("ASSIGN\n");
+            }
+            else if (node->ivalue == 270)
+            {
+                printf("CMP\n");
+            }
+            else if (node->ivalue == 272)
+            {
+                printf("EOL\n");
             }
         }
     }
@@ -858,8 +898,14 @@ void showAst(past node, int nest)
 
 int main(int argc, char **argv)
 {
-    openInput(argc, argv);
-    yyin = fpIn;
+    //	if(argc != 2 )
+    //	{
+    //		printf("input file is needed.\n");
+    //		return 0;
+    //	}
+    //	FILE* f = fopen(argv[1]);
+    setbuf(stdout, NULL);
+    yyin = fopen("test.c", "r");
     advance();
     past rr = astProgram();
     showAst(rr, 0);
