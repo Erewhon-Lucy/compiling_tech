@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 #include "ast.h"
 
 void showAst(past node, int nest)
@@ -86,3 +90,53 @@ past newList(past left, past right)
     var->nodeType = "none";
     return var;
 }
+
+past newVarRef(int tok, int i)
+{
+    past var = newAstNode();
+    switch (i)
+    {
+    case 1: var->nodeType = "expr"; break;
+    case 2: var->nodeType = "id";break;
+    case 3: var->nodeType = "initializer";break;
+    case 4: var->nodeType = "type";break;
+    case 5: var->nodeType = "if";break;
+    case 6: var->nodeType = "else";break;
+    case 7: var->nodeType = "while";break;
+    case 8: var->nodeType = "return";break;
+    case 9: var->nodeType = "print";break;
+    case 10: var->nodeType = "scan";break;
+    default:
+        break;
+    }
+    var->ivalue = tok;
+    return var;
+}
+
+past newBracket(int oper1, past var, int oper2)
+{
+    if (var == NULL)
+    {
+        var = newAstNode();
+        var->ivalue = -11;
+        var->nodeType = "none";
+    }
+    past var1 = newAstNode();
+    past var2 = newAstNode();
+    var1->nodeType = "expr";
+    var1->ivalue = oper1;
+    var2->nodeType = "expr";
+    var2->ivalue = oper2;
+    past parent1 = newAstNode();
+    parent1->ivalue = -11;
+    parent1->nodeType = "none";
+    parent1->left = var1;
+    parent1->right = var;
+    past parent2 = newAstNode();
+    parent2->ivalue = -11;
+    parent2->nodeType = "none";
+    parent2->left = parent1;
+    parent2->right = var2;
+    return parent2;
+}
+

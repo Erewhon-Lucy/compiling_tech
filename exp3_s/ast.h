@@ -3,6 +3,25 @@
 #include <string.h>
 #include <stdbool.h>
 
+// enum yytokenType
+// {
+//     INT = 258,
+//     STR = 259,
+//     VOID = 260,
+//     ID = 261,
+//     IF = 262,
+//     ELSE = 263,
+//     WHILE = 264,
+//     RETURN = 265,
+//     PRINT = 266,
+//     SCAN = 267,
+//     STRING = 268,
+//     ASSIGN = 269,
+//     CMP = 270,
+//     NUMBER = 271,
+//     EOL = 272
+// };
+
 typedef struct _ast ast;
 typedef struct _ast *past;
 struct _ast{
@@ -15,35 +34,11 @@ struct _ast{
     past child5;
     past child6;
     past child7;
-    past child8;
 };
 
-past astId_list();
-past astExpr_list();
-past astPrimary_expr();
-past astMul_expr();
-past astAdd_expr();
-past astCmp_expr();
-past astExpr();
-past astExpression_statement();
-past astStatement_list();
-past astStatement();
-past astType();
-past astParameter();
-past astParameter_list();
-past astDeclarator();
-past astInitializer();
-past astInstr_list();
-past astDeclarator_list();
-past astDecl_or_stmt();
-past astExternal_delcaration();
-past astProgram();
 void showAst();
 void advance();
 past newTerminal();
 past newAstNode();
 past newNum();
 past connect();
-
-void advance();
-past astId_list();

@@ -1,109 +1,110 @@
-    1 program: external_declaration
-    2        | program external_declaration
+program: external_declaration
+        | program external_declaration
 
-    3 external_declaration: function_definition
-    4                     | declaration
+external_declaration: function_definition
+                    | declaration
 
-    5 function_definition: type declarator compound_statement
+function_definition: type declarator compound_statement
 
-    6 declaration: type init_declarator_list ';'
+declaration: type init_declarator_list ';'
 
-    7 init_declarator_list: init_declarator
-    8                     | init_declarator_list ',' init_declarator
+init_declarator_list: init_declarator
+                    | init_declarator_list ',' init_declarator
 
-    9 init_declarator: declarator
-   10                | declarator '=' add_expr
-   11                | declarator '=' '{' intstr_list '}'
+init_declarator: declarator
+                | declarator '=' add_expr
+                | declarator '=' '{' intstr_list '}'
 
-   12 intstr_list: initializer
-   13            | intstr_list ',' initializer
+intstr_list: initializer
+            | intstr_list ',' initializer
 
-   14 initializer: NUMBER
-   15            | STRING
+initializer: NUMBER
+            | STRING
 
-   16 declarator: direct_declarator
+declarator: direct_declarator
 
-   17 direct_declarator: ID
-   18                  | direct_declarator '(' parameter_list ')'
-   19                  | direct_declarator '(' ')'
-   20                  | ID '[' expr ']'
-   21                  | ID '[' ']'
+direct_declarator: ID
+                | direct_declarator '(' parameter_list ')'
+                | direct_declarator '(' ')'
+                | ID '[' expr ']'
+                | ID '[' ']'
 
-   22 parameter_list: parameter
-   23               | parameter_list ',' parameter
 
-   24 parameter: type ID
+parameter_list: parameter
+              | parameter_list ',' parameter
 
-   25 type: INT
-   26     | STR
-   27     | VOID
+parameter: type ID
 
-   28 statement: compound_statement
-   29          | expression_statement
-   30          | selection_statement
-   31          | iteration_statement
-   32          | jump_statement
-   33          | print_statement
-   34          | scan_statement
-   35          | declaration
+type: INT
+    | STR
+    | VOID
 
-   36 compound_statement: begin_scope end_scope
-   37                   | begin_scope statement_list end_scope
+statement: compound_statement
+         | expression_statement
+         | selection_statement
+         | iteration_statement
+         | jump_statement
+         | print_statement
+         | scan_statement
+         | declaration
 
-   38 begin_scope: '{'
+compound_statement: begin_scope end_scope
+                  | begin_scope statement_list end_scope
 
-   39 end_scope: '}'
+begin_scope: '{'
 
-   40 statement_list: statement
-   41               | statement_list statement
+end_scope: '}'
 
-   42 expression_statement: ';'
-   43                     | expr ';'
+statement_list: statement
+              | statement_list statement
 
-   44 selection_statement: IF '(' expr ')' statement
-   45                    | IF '(' expr ')' statement ELSE statement
+expression_statement: ';'
+                    | expr ';'
 
-   46 iteration_statement: WHILE '(' expr ')' statement
+selection_statement: IF '(' expr ')' statement
+                   | IF '(' expr ')' statement ELSE statement
 
-   47 jump_statement: RETURN ';'
-   48               | RETURN expr ';'
+iteration_statement: WHILE '(' expr ')' statement
 
-   49 print_statement: PRINT ';'
-   50                | PRINT expr_list ';'
+jump_statement: RETURN ';'
+              | RETURN expr ';'
 
-   51 scan_statement: SCAN id_list ';'
+print_statement: PRINT ';'
+               | PRINT expr_list ';'
 
-   52 expr: assign_expr
+scan_statement: SCAN id_list ';'
 
-   53 assign_expr: cmp_expr
-   54            | ID ASSIGN assign_expr
-   55            | ID '=' assign_expr
-   56            | ID '[' expr ']' '=' assign_expr
+expr: assign_expr
 
-   57 cmp_expr: add_expr
-   58         | cmp_expr CMP add_expr
+assign_expr: cmp_expr
+           | ID ASSIGN assign_expr
+           | ID '=' assign_expr
+           | ID '[' expr ']' '=' assign_expr
 
-   59 add_expr: mul_expr
-   60         | add_expr '+' mul_expr
-   61         | add_expr '-' mul_expr
+cmp_expr: add_expr
+        | cmp_expr CMP add_expr
 
-   62 mul_expr: primary_expr
-   63         | mul_expr '*' primary_expr
-   64         | mul_expr '/' primary_expr
-   65         | mul_expr '%' primary_expr
-   66         | '-' primary_expr
+add_expr: mul_expr
+        | add_expr '+' mul_expr
+        | add_expr '-' mul_expr
 
-   67 primary_expr: ID '(' expr_list ')'
-   68             | ID '(' ')'
-   69             | '(' expr ')'
-   70             | ID
-   71             | initializer
-   72             | ID '[' expr ']'
+mul_expr: primary_expr
+        | mul_expr '*' primary_expr
+        | mul_expr '/' primary_expr
+        | mul_expr '%' primary_expr
+        | '-' primary_expr
 
-   73 expr_list: expr
-   74          | expr_list ',' expr
+primary_expr: ID '(' expr_list ')'
+            | ID '(' ')'
+            | '(' expr ')'
+            | ID
+            | initializer
+            | ID '[' expr ']'
 
-   75 id_list: ID
-   76        | id_list ',' ID
+expr_list: expr
+         | expr_list ',' expr
+
+id_list: ID
+       | id_list ',' ID
    
    

@@ -1,29 +1,38 @@
-//
-//  main.c
-//  rdparser
-//
-//  Created by Jackie shi on 2020/12/6.
-//
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
-enum yytokenType{ID = 258,NUMBER = 259,ELSE = 260,EOL = 261,STRING = 262,CMP = 264,RETURN = 265,IF = 266,PRINT = 267,SCAN = 268,WHILE = 269,INT = 270, STR = 271, VOID = 272};
+enum yytokenType
+{
+    INT = 258,
+    STR = 259,
+    VOID = 260,
+    ID = 261,
+    IF = 262,
+    ELSE = 263,
+    WHILE = 264,
+    RETURN = 265,
+    PRINT = 266,
+    SCAN = 267,
+    STRING = 268,
+    ASSIGN = 269,
+    CMP = 270,
+    NUMBER = 271,
+    EOL = 272
+};
 extern int yylex();
 extern int yylval;
 extern char *yytext;
 extern FILE *yyin;
+FILE *fpIn;
 int token;
 
 
 typedef struct _ast ast;
 typedef struct _ast *past;
 struct _ast{
-    //结点类型
     char *nodeType;
-    //属性值
     int atri_value;
     past child1;
     past child2;
@@ -66,9 +75,32 @@ past astId_list();
 
 void advance(){
     token = yylex();
+    while (token == EOL)
+    {
+        token = yylex();
+    }
+    printf("tok: %s\n", yytext);
 }
 
-//新建结点,初始化
+void openInput(int argc, char *argv[])
+{
+    fpIn = NULL;
+    if (argc > 1)
+    {
+        if ((fpIn = fopen(argv[1], "r")) == NULL)
+        {
+            fprintf(stderr, "Error opening input file:  %s", argv[1]);
+        }
+    }
+    else
+        fpIn = stdin;
+}
+
+void closeInput(FILE *in)
+{
+    fclose(in);
+}
+
 past newAstNode()
 {
     past node = malloc(sizeof(ast));
@@ -79,6 +111,14 @@ past newAstNode()
     }
     memset(node, 0, sizeof(ast));
     return node;
+}
+
+past newNum(int value)
+{
+    past var = newAstNode();
+    var->nodeType = "intValue";
+    var->child1 = value;
+    return var;
 }
 
 past connect(char *ch,past c1,past c2,past c3,past c4,past c5,past c6,past c7,past c8){
@@ -204,7 +244,7 @@ past astPrimary_expr(){
             }
         }
     }else if(token == NUMBER){
-        past l1 = newTerminal("NUMBER");
+        past l1 = newNum(token);
         advance();
         return l1;
     }else if(token == STRING){
@@ -684,7 +724,7 @@ past astDeclarator(){
 
 past astInitializer(){
     if(token == NUMBER){
-        past l1 = newTerminal("NUMBER");
+        past l1 = newNum(token);
         advance();
         return l1;
     }else if(token == STRING){
@@ -910,9 +950,16 @@ void showAst(past node, int nest)
     showAst(node->child8, nest+1);
 }
 
-int main(int argc, const char * argv[]) {
+int main(int argc, char ** argv) {
+    // advance();
+    // past l = astProgram();
+    // showAst(l,0);
+    // return 0;
+    openInput(argc, argv);
+    yyin = fpIn;
     advance();
-    past l = astProgram();
-    showAst(l,0);
+    past rr = astProgram();
+    showAst(rr, 0);
+
     return 0;
 }

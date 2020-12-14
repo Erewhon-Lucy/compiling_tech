@@ -67,7 +67,6 @@ void showAst(past node, int nest)
     showAst(node->child5, nest+1);
     showAst(node->child6, nest+1);
     showAst(node->child7, nest+1);
-    showAst(node->child8, nest+1);
 }
 
 past newAstNode()
@@ -82,13 +81,13 @@ past newAstNode()
     return node;
 }
 
-past newNum(int value)
-{
-    past var = newAstNode();
-    var->nodeType = "intValue";
-    var->child1 = value;
-    return var;
-}
+// past newNum(int value)
+// {
+//     past var = newAstNode();
+//     var->nodeType = "intValue";
+//     var->child1 = value;
+//     return var;
+// }
 
 past connect(char *ch,past c1,past c2,past c3,past c4,past c5,past c6,past c7,past c8){
     past leader = newAstNode();
@@ -100,7 +99,6 @@ past connect(char *ch,past c1,past c2,past c3,past c4,past c5,past c6,past c7,pa
     leader->child5 = c5;
     leader->child6 = c6;
     leader->child7 = c7;
-    leader->child8 = c8;
     return leader;
 }
 
