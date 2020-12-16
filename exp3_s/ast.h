@@ -17,4 +17,4 @@ void advance();
 past newTerminal();
 past newAstNode();
 past newNum();
-past connect();
+past unite();

@@ -4,25 +4,6 @@
 #include <stdbool.h>
 #include "ast.h"
 
-enum yytokentype {
-    EOL = 258,
-    NUMBER = 259,
-    STRING = 260,
-    ID = 261,
-    INT = 262,
-    STR = 263,
-    VOID = 264,
-    IF = 265,
-    ELSE = 266,
-    WHILE = 267,
-    RETURN = 268,
-    PRINT = 269,
-    SCAN = 270,
-    ASSIGN = 271,
-    CMP = 272,
-    SCOPE = 273
-};
-
 void showAst(past node, int nest)
 {
     if(node == NULL)
@@ -30,7 +11,7 @@ void showAst(past node, int nest)
     int i = 0;
     for(i = 0; i < nest; i ++)
         printf("    ");
-    if(strcmp(node->nodeType,"program") == 0)
+    if(strcmp(node->nodeType,"program") == 0)//实际上忽略
         printf("%s\n", node->nodeType);
     else if(strcmp(node->nodeType,"external_declaration") == 0)
         printf("%s\n", node->nodeType);
@@ -156,6 +137,13 @@ void showAst(past node, int nest)
     showAst(node->child7, nest+1);
 }
 
+// past newNum(int num)
+// {
+//     past l = newAstNode();
+//     l->nodeType = "NUMBER";
+//     l->ivalue = num;
+// }
+
 past newAstNode()
 {
     past node = malloc(sizeof(ast));
@@ -168,15 +156,7 @@ past newAstNode()
     return node;
 }
 
-// past newNum(int value)
-// {
-//     past var = newAstNode();
-//     var->nodeType = "intValue";
-//     var->child1 = value;
-//     return var;
-// }
-
-past connect(char *ch,past c1,past c2,past c3,past c4,past c5,past c6,past c7,past c8){
+past unite(char *ch,past c1,past c2,past c3,past c4,past c5,past c6,past c7,past c8){
     past leader = newAstNode();
     leader->nodeType = ch;
     leader->child1 = c1;

@@ -1,8 +1,9 @@
 %{
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
-
+extern char* yytext;
 int yylex(void);
 void yyerror(char *);
 struct _ast* root;
@@ -10,26 +11,12 @@ struct _ast* root;
 %}
 
 %union{
-    int	iValue;
+	int	iValue;
 	struct _ast*	pAst;
-    char *String;
-    char * id;
 };
 
-%token <String> VOID 264
-%token <String> STR 263
-%token <String> STRING 260
-%token <String> INT
-%token <id> ID
-%token <String> ASSIGN
-%token <iValue> NUMBER 
-%token <String> CMP
-%token <String> IF 266
-%token <String> WHILE 267
-%token <String> ELSE 268
-%token <String> PRINT 270
-%token <String> SCAN 271
-%token <String> RETURN 
+%token <pAst>   IF ELSE WHILE RETURN PRINT SCAN STR INT VOID
+%token <pAst>   NUMBER CMP ASSIGN ID STRING
 %type  <pAst>	program external_declaration function_definition
 %type  <pAst>   declaration init_declarator_list init_declarator intstr_list
 %type  <pAst>   initializer declarator direct_declarator parameter_list parameter
@@ -40,8 +27,8 @@ struct _ast* root;
 
 %%
 
-program: external_declaration           {showAst($1,0);}
-        | program external_declaration  {showAst($1,0);}
+program: external_declaration           {$$ = connect("program",$1,NULL,NULL,NULL,NULL,NULL,NULL);}
+        | program external_declaration  {$$ = connect("program",$1,$2,NULL,NULL,NULL,NULL,NULL);root = $$;}
 
 external_declaration: function_definition       {$$ = connect("external_declaration",$1,NULL,NULL,NULL,NULL,NULL,NULL);} 
                     | declaration               {$$ = connect("external_declaration",$1,NULL,NULL,NULL,NULL,NULL,NULL);}
@@ -131,23 +118,23 @@ add_expr: mul_expr                      {$$ = connect("add_expr",$1,NULL,NULL,NU
         | add_expr '-' mul_expr         {$$ = connect("add_expr",$1,newTerminal("-"),$3,NULL,NULL,NULL,NULL);}
 
 mul_expr: primary_expr                  {$$ = connect("mul_expr",$1,NULL,NULL,NULL,NULL,NULL,NULL);}
-        | mul_expr '*' primary_expr     {$$ = connect("mul_expr",$1,newTerminal("*"),$3,NULL,NULL,NULL,NULL);}
-        | mul_expr '/' primary_expr     {$$ = connect("mul_expr",$1,newTerminal("/"),$3,NULL,NULL,NULL,NULL);}
-        | mul_expr '%' primary_expr     {$$ = connect("mul_expr",$1,newTerminal("%"),$3,NULL,NULL,NULL,NULL);}
-        | '-' primary_expr              {$$ = connect("mul_expr",newTerminal("-"),$2,NULL,NULL,NULL,NULL,NULL);}
+        | mul_expr '*' primary_expr     {$2=newTerminal("*");$$ = connect("mul_expr",$1,newTerminal("*"),$3,NULL,NULL,NULL,NULL);}
+        | mul_expr '/' primary_expr     {$2=newTerminal("/");$$ = connect("mul_expr",$1,$2,$3,NULL,NULL,NULL,NULL);}
+        | mul_expr '%' primary_expr     {$2=newTerminal("%");$$ = connect("mul_expr",$1,$2,$3,NULL,NULL,NULL,NULL);}
+        | '-' primary_expr              {$1=newTerminal("-");$$ = connect("mul_expr",$1,$2,NULL,NULL,NULL,NULL,NULL);}
 
-primary_expr: ID '(' expr_list ')'      {$$ = connect("primary_expr",newTerminal("ID"),newTerminal("("),$3,newTerminal(")"),NULL,NULL,NULL);}
-            | ID '(' ')'                {$$ = connect("primary_expr",newTerminal("ID"),newTerminal("("),newTerminal(")"),NULL,NULL,NULL,NULL);}
-            | '(' expr ')'              {$$ = connect("primary_expr",newTerminal("("),$2,newTerminal(")"),NULL,NULL,NULL,NULL);}
-            | ID                        {$$ = connect("primary_expr",newTerminal("ID"),NULL,NULL,NULL,NULL,NULL,NULL);}
+primary_expr: ID '(' expr_list ')'      {$1=newTerminal("ID");$2=newTerminal("(");$4=newTerminal(")");$$ = connect("primary_expr",$1,$2,$3,$4,NULL,NULL,NULL);}
+            | ID '(' ')'                {$1=newTerminal("ID");$2=newTerminal("(");$3=newTerminal(")");$$ = connect("primary_expr",$1,$2,$3,NULL,NULL,NULL,NULL);}
+            | '(' expr ')'              {$1=newTerminal("(");$3=newTerminal(")");$$ = connect("primary_expr",$1,$2,$3,NULL,NULL,NULL,NULL);}
+            | ID                        {$1=newTerminal("ID");$$ = connect("primary_expr",$1,NULL,NULL,NULL,NULL,NULL,NULL);}
             | initializer               {$$ = connect("primary_expr",$1,NULL,NULL,NULL,NULL,NULL,NULL);}
-            | ID '[' expr ']'           {$$ = connect("primary_expr",newTerminal("ID"),newTerminal("["),$3,newTerminal("]"),NULL,NULL,NULL);}
+            | ID '[' expr ']'           {$1=newTerminal("ID");$2=newTerminal("[");$4=newTerminal("]");$$ = connect("primary_expr",$1,$2,$3,$4,NULL,NULL,NULL);}
 
 expr_list: expr                         {$$ = connect("expr_list",$1,NULL,NULL,NULL,NULL,NULL,NULL);}
-         | expr_list ',' expr           {$$ = connect("expr_list",$1,newTerminal(","),$3,NULL,NULL,NULL,NULL);}
+         | expr_list ',' expr           {$2=newTerminal(",");$$ = connect("expr_list",$1,$2,$3,NULL,NULL,NULL,NULL);}
 
-id_list: ID                             {$$ = connect("id_list",newTerminal("ID"),NULL,NULL,NULL,NULL,NULL,NULL);}
-       | id_list ',' ID                 {$$ = connect("id_list",$1,newTerminal(","),newTerminal("ID"),NULL,NULL,NULL,NULL);}
+id_list: ID                             {$1=newTerminal("ID");$$ = connect("id_list",$1,NULL,NULL,NULL,NULL,NULL,NULL);}
+       | id_list ',' ID                 {$2=newTerminal(",");$3=newTerminal("ID");$$ = connect("id_list",$1,$2,$3,NULL,NULL,NULL,NULL);}
 
 %%
 

@@ -24,9 +24,11 @@ void closeInput(FILE *in)
     fclose(in);
 }
 
-int main(int argc, char ** argv) {
+int main(int argc, char ** argv)
+{
     openInput(argc, argv);
     yyin = fpIn;
     yyparse();
+    closeInput(fpIn);
     return 0;
 }

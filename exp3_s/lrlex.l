@@ -8,9 +8,11 @@ void yyerror(char *);
 
 %}
 
-DIGIT [0-9]
-LETTER [a-zA-Z]
-STRING \"[^\"]*\"
+digit [0-9]
+number {digit}+
+letter [A-Za-z]
+letters {letter}+
+identifier (_|{letter})({letter}|{digit}|_)*
 
 %%
 
@@ -24,14 +26,14 @@ str 		{return STR;}
 void		{return VOID;}
 print   	{return PRINT;}
 scan    	{return SCAN;}
-[a-zA-Z]?[a-zA-Z0-9]*			{return ID;}
+
 [>=]|[<=]|[==]|[!=]|[>]|[<]|[|]|[&]&|[&]|[||]		{return CMP;}
 [+=]|[-=]|[/=]|[*=]|[%=]							{return ASSIGN;}
-[,]|[(]|[)]|[{]|[}]|[[]|[]]|[=]		{return *yytext;}
-[/*-+%\n]						{return *yytext;}
-[;\n]							{return *yytext;}
+[,]|[(]|[)]|[{]|[}]|[[]|[]]|[=]|[*]|[/]|[%]|[+]|[-]|[;]		{return *yytext;}
 
-[0-9]+			{return NUMBER;}
+{identifier}	{return ID;}
+[0-9]+ {return NUMBER;}
+"\n"	{}
 "\""(.)+"\""    {return STRING;}
 "//"+.*
 
