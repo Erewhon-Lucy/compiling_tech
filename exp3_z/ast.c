@@ -4,97 +4,14 @@
 #include <stdbool.h>
 #include "ast.h"
 
-enum yytokentype {
-    EOL = 258,
-    NUMBER = 259,
-    STRING = 260,
-    ID = 261,
-    INT = 262,
-    STR = 263,
-    VOID = 264,
-    IF = 265,
-    ELSE = 266,
-    WHILE = 267,
-    RETURN = 268,
-    PRINT = 269,
-    SCAN = 270,
-    ASSIGN = 271,
-    CMP = 272,
-    SCOPE = 273
-};
-
 void showAst(past node, int nest)
 {
     if(node == NULL)
         return;
     int i = 0;
     for(i = 0; i < nest; i ++)
-        printf("    ");
-    if(strcmp(node->nodeType,"program") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"external_declaration") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"function_definition") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"declaration") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"init_declarator_list") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"init_declarator") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"intstr_list") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"initializer") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"declarator") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"direct_declarator") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"parameter_list") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"parameter") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"type") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"statement") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"compound_statement") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"begin_scope") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"end_scope") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"statement_list") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"expression_statement") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"selection_statement") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"iteration_statement") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"jump_statement") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"print_statement") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"scan_statement") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"expr") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"assign_expr") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"cmp_expr") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"add_expr") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"mul_expr") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"primary_expr") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"expr_list") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType,"id_list") == 0)
-        printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, ",") == 0)
+        printf("  ");
+    if(strcmp(node->nodeType, ",") == 0)
         printf("%s\n", node->nodeType);
     else if(strcmp(node->nodeType, "=") == 0)
         printf("%s\n", node->nodeType);

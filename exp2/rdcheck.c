@@ -578,7 +578,7 @@ int cmp_expr()
 int add_expr()
 {
 	int t = mul_expr();
-	while (tok == '+' | tok == '-')
+	while (tok == '+' || tok == '-')
 	{
 		int ntok = tok;
         if (ntok == '+')
@@ -613,7 +613,7 @@ int mul_expr()
 	else
 	{
 		t = primary_expr();
-		while (tok == '*' | tok == '/' | tok == '%')
+		while (tok == '*' || tok == '/' || tok == '%')
 		{
 			int ntok = tok;
 			if (ntok == '*')

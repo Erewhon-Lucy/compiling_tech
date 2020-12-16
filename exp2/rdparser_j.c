@@ -137,7 +137,7 @@ past newVarRef(int tok, int i)
     past var = newAstNode();
     switch (i)
     {
-    case 1: var->nodeType = "expr"; break;
+    case 1: var->nodeType = "ch"; break;
     case 2: var->nodeType = "id";break;
     case 3: var->nodeType = "initializer";break;
     case 4: var->nodeType = "type";break;
@@ -164,9 +164,9 @@ past newBracket(int oper1, past var, int oper2)
     }
     past var1 = newAstNode();
     past var2 = newAstNode();
-    var1->nodeType = "expr";
+    var1->nodeType = "ch";
     var1->ivalue = oper1;
-    var2->nodeType = "expr";
+    var2->nodeType = "ch";
     var2->ivalue = oper2;
     past parent1 = newAstNode();
     parent1->ivalue = -11;
@@ -193,7 +193,6 @@ past astProgram()
             n = astProgram();
         }
     }
-    l->nodeType = "program";
     return l;
 }
 
@@ -213,7 +212,6 @@ past astExternal_declaration()
             }
         }
     }
-    l->nodeType = "external_declaration";
     return l;
 }
 
@@ -225,14 +223,15 @@ past astDecl_or_stmt()
         advance();
         if (tok == '}')
         {
+            past l = newVarRef(tok,1);
             advance();
+            return l;
         }
         else
         {
             past l = astStatement_list();
             advance();
             l = newBracket('{', l, '}');
-            l->nodeType = "decl_or_stmt";
             return l;
         }
     }
@@ -246,11 +245,11 @@ past astDecl_or_stmt()
             if (tok == ';')
             {
                 past r = newVarRef(tok, 1);
+                past h;
                 advance();
                 l = newList(n, l);
-                l = newList(l, r);
-                l->nodeType = "decl_or_stmt";
-                return l;
+                h = newList(l, r);
+                return h;
             }
         }
     }
@@ -258,7 +257,6 @@ past astDecl_or_stmt()
     {
         past l = newVarRef(tok, 1);
         advance();
-        l->nodeType = "decl_or_stmt";
         return l;
     }
     return NULL;
@@ -277,7 +275,6 @@ past astDeclarator_list()
             l = newExpr(',', l, r);
         }
     }
-    l->nodeType = "declarator_list";
     return l;
 }
 
@@ -293,7 +290,6 @@ past astIntstr_list()
             l = newExpr(',', l, r);
         }
     }
-    l->nodeType = "intstr_list";
     return l;
 }
 
@@ -303,7 +299,6 @@ past astInitializer()
     {
         past l = newVarRef(tok, 3);
         advance();
-        l->nodeType = "initializer";
         return l;
     }
     return NULL;
@@ -322,7 +317,6 @@ past astDeclarator()
             if (l != NULL)
             {
                 l = newExpr('=', n, l);
-                l->nodeType = "declarator";
                 return l;
             }
         }
@@ -335,7 +329,6 @@ past astDeclarator()
                 l = newBracket('(', l, ')');
                 l = newList(n, l);
                 advance();
-                l->nodeType = "declarator";
                 return l;
             }
         }
@@ -366,11 +359,9 @@ past astDeclarator()
                         }
                     }
                 }
-                l->nodeType = "declarator";
                 return l;
             }
         }
-        n->nodeType = "declarator";
         return n;
     }
     return NULL;
@@ -387,7 +378,6 @@ past astParameter_list()
             l = newExpr(',', l, r);
         }
     }
-    l->nodeType = "parameter_list";
     return l;
 }
 
@@ -403,7 +393,6 @@ past astParameter()
             advance();
         }
     }
-    l->nodeType = "parameter";
     return l;
 }
 
@@ -413,7 +402,6 @@ past astType()
     {
         past l = newVarRef(tok, 4);
         advance();
-        l->nodeType = "type";
         return l;
     }
     return NULL;
@@ -432,7 +420,6 @@ past astStatement()
             {
                 l = newBracket('{', l, '}');
                 advance();
-                l->nodeType = "statement";
                 return l;
             }
         }
@@ -467,7 +454,6 @@ past astStatement()
                                 l = newList(l, n);
                             }
                         }
-                        l->nodeType = "statement";
                         return l;
                     }
                 }
@@ -493,7 +479,6 @@ past astStatement()
                     {
                         l = newList(n, l);
                         l = newList(l, r);
-                        l->nodeType = "statement";
                         return l;
                     }
                 }
@@ -514,7 +499,6 @@ past astStatement()
             past r = newVarRef(tok, 1);
             advance();
             n = newList(n, r);
-            n->nodeType = "statement";
             return n;
         }
     }
@@ -532,7 +516,6 @@ past astStatement()
             past r = newVarRef(tok, 1);
             advance();
             n = newList(n, r);
-            n->nodeType = "statement";
             return n;
         }
     }
@@ -549,7 +532,6 @@ past astStatement()
                 advance();
                 l = newList(n, l);
                 l = newList(l, r);
-                l->nodeType = "statement";
                 return l;
             }
         }
@@ -566,7 +548,6 @@ past astStatement()
                 l = newList(l, n);
                 l = newList(l, r);
                 advance();
-                l->nodeType = "statement";
                 return l;
             }
         }
@@ -574,7 +555,6 @@ past astStatement()
     l = astExpression_statement();
     if (l != NULL)
     {
-        l->nodeType = "statement";
         return l;
     }
     return NULL;
@@ -592,7 +572,6 @@ past astStatement_list()
             n = astStatement_list();
         }
     }
-    l->nodeType = "statement_list";
     return l;
 }
 
@@ -617,8 +596,6 @@ past astExpression_statement()
     {
         past r = newVarRef(tok, 1);
         advance();
-        r->nodeType = "expression_statement";
-        return r;
     }
     else
     {
@@ -630,12 +607,10 @@ past astExpression_statement()
             {
                 l = newList(n, l);
                 advance();
-                l->nodeType = "expression_statement";
                 return l;
             }
             else
             {
-                n->nodeType = "expression_statement";
                 return n;
             }
         }
@@ -646,7 +621,6 @@ past astExpression_statement()
 past ast_expr()
 {
     past l = astCmp_expr();
-    l->nodeType = "ast_expr";
     return l;
 }
 
@@ -665,7 +639,6 @@ past astCmp_expr()
             }
         }
     }
-    l->nodeType = "add_expr";
     return l;
 }
 
@@ -685,7 +658,6 @@ past astAdd_expr()
             }
         }
     }
-    l->nodeType = "add_expr";
     return l;
 }
 
@@ -698,7 +670,6 @@ past astMul_expr()
         if (l != NULL)
         {
             l = newExpr('-', NULL, l);
-            l->nodeType = "mul_expr";
             return l;
         }
     }
@@ -718,7 +689,6 @@ past astMul_expr()
                 }
             }
         }
-        l->nodeType = "mul_expr";
         return l;
     }
 }
@@ -738,7 +708,6 @@ past astPrimary_expr()
                 advance();
                 l = newBracket('(', l, ')');
                 l = newList(n, l);
-                l->nodeType = "primary_expr";
                 return l;
             }
         }
@@ -761,7 +730,6 @@ past astPrimary_expr()
                             l = newExpr('=', l, r);
                         }
                     }
-                    l->nodeType = "primary_expr";
                     return l;
                 }
             }
@@ -773,7 +741,6 @@ past astPrimary_expr()
             if (l != NULL)
             {
                 l = newExpr(ASSIGN, n, l);
-                l->nodeType = "primary_expr";
                 return l;
             }
         }
@@ -789,7 +756,6 @@ past astPrimary_expr()
             {
                 advance();
                 l = newBracket('(', l, ')');
-                l->nodeType = "primary_expr";
                 return l;
             }
         }
@@ -798,14 +764,12 @@ past astPrimary_expr()
     {
         past n = newNum(yylval);
         advance();
-        n->nodeType = "primary_expr";
         return n;
     }
     else if (tok == STRING)
     {
         past n = newVarRef(tok, 3);
         advance();
-        n->nodeType = "primary_expr";
         return n;
     }
     return NULL;
@@ -825,7 +789,6 @@ past astExpr_list()
             }
         }
     }
-    l->nodeType = "expr_list";
     return l;
 }
 
@@ -843,7 +806,6 @@ past astId_list()
                 l = newExpr(',', l, r);
             }
         }
-        l->nodeType = "id_list";
         return l;
     }
     return NULL;
@@ -858,7 +820,8 @@ void showAst(past node, int nest)
     {
         int i = 0;
         for (i = 0; i < nest; i++)
-            printf("   ");
+            printf("  ");
+
         if (strcmp(node->nodeType, "ch") == 0)
         {
             printf("%s %c\n", node->nodeType, (char)node->ivalue);
@@ -867,46 +830,6 @@ void showAst(past node, int nest)
         {
             printf("%s %d\n", node->nodeType, node->ivalue);
         }
-        else if(strcmp(node->nodeType,"program") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"external_declaration") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"decl_or_stmt") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"declarator_list") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"intstr_list") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"initializer") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"declarator") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"parameter_list") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"parameter") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"type") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"statement") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"statement_list") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"expression_statement") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"expr") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"cmp_expr") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"add_expr") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"mul_expr") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"primary_expr") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"expr_list") == 0)
-            printf("%s\n", node->nodeType);
-        else if(strcmp(node->nodeType,"id_list") == 0)
-            printf("%s\n", node->nodeType);
         else
         {
             printf("%s ", node->nodeType);

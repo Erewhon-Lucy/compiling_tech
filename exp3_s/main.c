@@ -1,9 +1,8 @@
 #include <stdio.h>
-
+#include "ast.h"
 extern FILE *yyin;
-extern int yyparse();
-extern struct _ast* root;
-extern void showAst();
+past yyparse();
+
 FILE *fpIn;
 
 void openInput(int argc, char *argv[])
@@ -29,6 +28,5 @@ int main(int argc, char ** argv) {
     openInput(argc, argv);
     yyin = fpIn;
     yyparse();
-    showAst(root,0);
     return 0;
 }

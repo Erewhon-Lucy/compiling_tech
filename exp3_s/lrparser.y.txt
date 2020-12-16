@@ -40,13 +40,13 @@ struct _ast* root;
 
 %%
 
-program: external_declaration          {$$=connect("program",$1,NULL,NULL,NULL,NULL,NULL,NULL);showAst($1,0);}
-        | program external_declaration {$$=connect("program",$1,$2,NULL,NULL,NULL,NULL,NULL);showAst($2,0);}
+program: external_declaration           {showAst($1,0);}
+        | program external_declaration  {showAst($1,0);}
 
 external_declaration: function_definition       {$$ = connect("external_declaration",$1,NULL,NULL,NULL,NULL,NULL,NULL);} 
                     | declaration               {$$ = connect("external_declaration",$1,NULL,NULL,NULL,NULL,NULL,NULL);}
 
-function_definition: type declarator compound_statement         {printf("***()");$$ = connect("function_definition",$1,$2,$3,NULL,NULL,NULL,NULL);}
+function_definition: type declarator compound_statement         {$$ = connect("function_definition",$1,$2,$3,NULL,NULL,NULL,NULL);}
 
 declaration: type init_declarator_list ';'                      {$$ = connect("declaration",$1,$2,newTerminal(";"),NULL,NULL,NULL,NULL);}
 
@@ -60,12 +60,12 @@ init_declarator: declarator                             {$$ = connect("init_decl
 intstr_list: initializer                                {$$ = connect("intstr_list",$1,NULL,NULL,NULL,NULL,NULL,NULL);}
             | intstr_list ',' initializer               {$$ = connect("intstr_list",$1,newTerminal(","),$3,NULL,NULL,NULL,NULL);}
 
-initializer: NUMBER                                     {$$ = connect(newTerminal("NUMBER"),NULL,NULL,NULL,NULL,NULL,NULL);}
-            | STRING                                    {$$ = connect(newTerminal("STRING"),NULL,NULL,NULL,NULL,NULL,NULL);}
+initializer: NUMBER                                     {$$ = newTerminal("NUMBER");}
+            | STRING                                    {$$ = newTerminal("STRING");}
 
 declarator: direct_declarator                           {$$ = connect("declarator",$1,NULL,NULL,NULL,NULL,NULL,NULL);}
 
-direct_declarator: ID                                           {$$ = connect(newTerminal("ID"),NULL,NULL,NULL,NULL,NULL,NULL);}
+direct_declarator: ID                                           {$$ = newTerminal("ID");}
                 | direct_declarator '(' parameter_list ')'      {$$ = connect("direct_declarator",$1,newTerminal("("),$3,newTerminal(")"),NULL,NULL,NULL);}
                 | direct_declarator '(' ')'                     {$$ = connect("direct_declarator",$1,newTerminal("("),newTerminal(")"),NULL,NULL,NULL,NULL);}
                 | ID '[' expr ']'                               {$$ = connect("direct_declaration",newTerminal("ID"),newTerminal("["),$3,newTerminal("]"),NULL,NULL,NULL);}
@@ -90,7 +90,7 @@ statement: compound_statement   {$$ = connect("statement",$1,NULL,NULL,NULL,NULL
          | scan_statement       {$$ = connect("statement",$1,NULL,NULL,NULL,NULL,NULL,NULL);}
          | declaration          {$$ = connect("statement",$1,NULL,NULL,NULL,NULL,NULL,NULL);}
 
-compound_statement: begin_scope end_scope                       {printf("***begin_scope end_scope");$$ = connect("compound_statement",$1,$2,NULL,NULL,NULL,NULL,NULL);}
+compound_statement: begin_scope end_scope                       {$$ = connect("compound_statement",$1,$2,NULL,NULL,NULL,NULL,NULL);}
                   | begin_scope statement_list end_scope        {$$ = connect("compound_statement",$1,$2,$3,NULL,NULL,NULL,NULL);}
 
 begin_scope: '{'                {$$ = connect("begin_scope",newTerminal("{"),NULL,NULL,NULL,NULL,NULL,NULL);}

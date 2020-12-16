@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_LRPARSER_TAB_H_INCLUDED
-# define YY_YY_LRPARSER_TAB_H_INCLUDED
+#ifndef YY_YY_RDPARSER_TAB_H_INCLUDED
+# define YY_YY_RDPARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -45,21 +45,21 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    NUMBER = 258,
-    ID = 259,
-    STRING = 260,
-    INT = 261,
-    VOID = 262,
+    VOID = 264,
     STR = 263,
-    ASSIGN = 264,
-    CMP = 265,
-    WHILE = 266,
-    IF = 267,
+    STRING = 260,
+    INT = 273,
+    ID = 274,
+    ASSIGN = 275,
+    NUMBER = 276,
+    CMP = 277,
+    IF = 266,
+    WHILE = 267,
     ELSE = 268,
-    PRINT = 269,
-    SCAN = 270,
-    RETURN = 271,
-    END = 272
+    PRINT = 270,
+    SCAN = 271,
+    RETURN = 278,
+    F = 280
   };
 #endif
 
@@ -68,13 +68,16 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 11 "lrparser.y" /* yacc.c:1909  */
+#line 9 "rdparser.y" /* yacc.c:1909  */
 
-	int		num;//储存数字类
-	char		str[50];//储存非数字类
-	struct AST*	Ast;
+    int iValue;
+    past pAst;
+    char *String;
+    char * id;
+ //   char bracket;
+    char c;
 
-#line 78 "lrparser.tab.h" /* yacc.c:1909  */
+#line 81 "rdparser.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -87,4 +90,4 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_LRPARSER_TAB_H_INCLUDED  */
+#endif /* !YY_YY_RDPARSER_TAB_H_INCLUDED  */

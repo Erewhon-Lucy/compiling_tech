@@ -28,10 +28,10 @@ extern FILE *yyin;
 FILE *fpIn;
 int token;
 
-
 typedef struct _ast ast;
 typedef struct _ast *past;
-struct _ast{
+struct _ast
+{
     char *nodeType;
     int atri_value;
     past child1;
@@ -73,7 +73,8 @@ past connect();
 void advance();
 past astId_list();
 
-void advance(){
+void advance()
+{
     token = yylex();
     while (token == EOL)
     {
@@ -104,7 +105,7 @@ void closeInput(FILE *in)
 past newAstNode()
 {
     past node = malloc(sizeof(ast));
-    if(node == NULL)
+    if (node == NULL)
     {
         printf("run out of memory.\n");
         exit(0);
@@ -121,7 +122,8 @@ past newNum(int value)
     return var;
 }
 
-past connect(char *ch,past c1,past c2,past c3,past c4,past c5,past c6,past c7,past c8){
+past connect(char *ch, past c1, past c2, past c3, past c4, past c5, past c6, past c7, past c8)
+{
     past leader = newAstNode();
     leader->nodeType = ch;
     leader->child1 = c1;
@@ -135,164 +137,211 @@ past connect(char *ch,past c1,past c2,past c3,past c4,past c5,past c6,past c7,pa
     return leader;
 }
 
-past newTerminal(char *ch){
+past newTerminal(char *ch)
+{
     past l = newAstNode();
     l->nodeType = ch;
     return l;
 }
 
-past astId_list(){
-    if(token == ID){
+past astId_list()
+{
+    if (token == ID)
+    {
         past l1 = newTerminal("ID");
         advance();
-        while(token == ','){
+        while (token == ',')
+        {
             past l2 = newTerminal(",");
             advance();
-            if(token == ID){
+            if (token == ID)
+            {
                 past l3 = newTerminal("ID");
-                l1 = connect("id_list",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
+                l1 = connect("id_list", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
                 advance();
             }
-            else{
+            else
+            {
                 return NULL;
             }
         }
         return l1;
     }
-    else{
+    else
+    {
         return NULL;
     }
 }
 
-past astExpr_list(){
+past astExpr_list()
+{
     past l1 = astExpr();
-    if(l1 != NULL){
-        while(token == ','){
+    if (l1 != NULL)
+    {
+        while (token == ',')
+        {
             past l2 = newTerminal(",");
             advance();
             past l3 = astExpr();
-            if(l3 != NULL){
-                l1 = connect("expr_list",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
+            if (l3 != NULL)
+            {
+                l1 = connect("expr_list", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
             }
-            else{
+            else
+            {
                 return NULL;
             }
         }
         return l1;
     }
-    else{
+    else
+    {
         return NULL;
     }
 }
 
-past astPrimary_expr(){
-    if(token == ID){
+past astPrimary_expr()
+{
+    if (token == ID)
+    {
         past l1 = newTerminal("ID");
         advance();
-        switch (token) {
-            case '(':{
-                past l2 = newTerminal("(");
+        switch (token)
+        {
+        case '(':
+        {
+            past l2 = newTerminal("(");
+            advance();
+            if (token == ')')
+            {
+                past l3 = newTerminal(")");
                 advance();
-                if(token == ')'){
-                    past l3 = newTerminal(")");
+                l1 = connect("primary_expr", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+                return l1;
+            }
+            else
+            {
+                past l3 = astExpr_list();
+                if (token == ')')
+                {
+                    past l4 = newTerminal(")");
                     advance();
-                    l1 = connect("primary_expr",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
+                    l1 = connect("primary_expr", l1, l2, l3, l4, NULL, NULL, NULL, NULL);
                     return l1;
                 }
-                else{
-                    past l3 = astExpr_list();
-                    if(token == ')'){
-                        past l4 = newTerminal(")");
-                        advance();
-                        l1 = connect("primary_expr",l1,l2,l3,l4,NULL,NULL,NULL,NULL);
-                        return l1;
-                    }
-                }
-                break;
             }
-            case '=':{
-                past l2 = newTerminal("=");
-                advance();
-                past l3 = astExpr();
-                l1 = connect("primary_expr",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-                return l1;
-                break;
-            }
-            case '[':{
-                past l2 = newTerminal("[");
-                advance();
-                past l3 = astExpr();
-                if(token == ']'){
-                    past l4 = newTerminal("]");
-                    advance();
-                    if(token == '='){
-                        past l5 = newTerminal("=");
-                        advance();
-                        past l6 = astExpr();
-                        l1 = connect("primary_expr",l1,l2,l3,l4,l5,l6,NULL,NULL);
-                        return l1;
-                    }
-                    else{
-                        l1 = connect("primary_expr",l1,l2,l3,l4,NULL,NULL,NULL,NULL);
-                        return l1;
-                    }
-                }
-                break;
-            }
-            default:{
-                return l1;
-            }
+            break;
         }
-    }else if(token == NUMBER){
+        case '=':
+        {
+            past l2 = newTerminal("=");
+            advance();
+            past l3 = astExpr();
+            l1 = connect("primary_expr", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+            return l1;
+            break;
+        }
+        case '[':
+        {
+            past l2 = newTerminal("[");
+            advance();
+            past l3 = astExpr();
+            if (token == ']')
+            {
+                past l4 = newTerminal("]");
+                advance();
+                if (token == '=')
+                {
+                    past l5 = newTerminal("=");
+                    advance();
+                    past l6 = astExpr();
+                    l1 = connect("primary_expr", l1, l2, l3, l4, l5, l6, NULL, NULL);
+                    return l1;
+                }
+                else
+                {
+                    l1 = connect("primary_expr", l1, l2, l3, l4, NULL, NULL, NULL, NULL);
+                    return l1;
+                }
+            }
+            break;
+        }
+        default:
+        {
+            return l1;
+        }
+        }
+    }
+    else if (token == NUMBER)
+    {
         past l1 = newNum(token);
         advance();
         return l1;
-    }else if(token == STRING){
+    }
+    else if (token == STRING)
+    {
         past l1 = newTerminal("STRING");
         advance();
         return l1;
-    }else if(token == '('){
+    }
+    else if (token == '(')
+    {
         past l1 = newTerminal("(");
         advance();
         past l2 = astExpr();
-        if(token == ')'){
+        if (token == ')')
+        {
             past l3 = newTerminal(")");
             advance();
-            l1 = connect("primary_expr",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
+            l1 = connect("primary_expr", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
             return l1;
         }
-    }else{
+    }
+    else
+    {
         return NULL;
     }
     return NULL;
 }
 
-past astMul_expr(){
-    if(token == '-'){
+past astMul_expr()
+{
+    if (token == '-')
+    {
         past l1 = newTerminal("-");
         advance();
         past l2 = astPrimary_expr();
-        l1 = connect("mul_expr",l1,l2,NULL,NULL,NULL,NULL,NULL,NULL);
+        l1 = connect("mul_expr", l1, l2, NULL, NULL, NULL, NULL, NULL, NULL);
         return l1;
-    }else{
+    }
+    else
+    {
         past l1 = astPrimary_expr();
-        while(token == '*' || token == '/'|| token == '%'){
-            if(token == '*'){
+        while (token == '*' || token == '/' || token == '%')
+        {
+            if (token == '*')
+            {
                 past l2 = newTerminal("*");
                 advance();
                 past l3 = astPrimary_expr();
-                l1 = connect("mul_expr",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-            }else if(token == '/'){
+                l1 = connect("mul_expr", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+            }
+            else if (token == '/')
+            {
                 past l2 = newTerminal("/");
                 advance();
                 past l3 = astPrimary_expr();
-                l1 = connect("mul_expr",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-            }else if(token == '%'){
+                l1 = connect("mul_expr", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+            }
+            else if (token == '%')
+            {
                 past l2 = newTerminal("%");
                 advance();
                 past l3 = astPrimary_expr();
-                l1 = connect("mul_expr",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-            }else{
+                l1 = connect("mul_expr", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+            }
+            else
+            {
                 return NULL;
             }
         }
@@ -300,657 +349,880 @@ past astMul_expr(){
     }
 }
 
-past astAdd_expr(){
+past astAdd_expr()
+{
     past l1 = astMul_expr();
-    while(token == '+' || token == '-'){
-        if(token == '+'){
+    while (token == '+' || token == '-')
+    {
+        if (token == '+')
+        {
             past l2 = newTerminal("+");
             advance();
             past l3 = astMul_expr();
-            l1 = connect("add_expr",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-        }else if(token == '-'){
+            l1 = connect("add_expr", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+        }
+        else if (token == '-')
+        {
             past l2 = newTerminal("-");
             advance();
             past l3 = astMul_expr();
-            l1 = connect("add_expr",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-        }else{
+            l1 = connect("add_expr", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+        }
+        else
+        {
             return NULL;
         }
     }
     return l1;
 }
 
-past astCmp_expr(){
+past astCmp_expr()
+{
     past l1 = astAdd_expr();
-    while(token == CMP){
+    while (token == CMP)
+    {
         past l2 = newTerminal("CMP");
         advance();
         past l3 = astAdd_expr();
-        l1 = connect("cmp_expr",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
+        l1 = connect("cmp_expr", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
     }
     return l1;
 }
 
-past astExpr(){
+past astExpr()
+{
     past l1 = astCmp_expr();
     return l1;
 }
 
-past astExpression_statement(){
-    if(token == ';'){
+past astExpression_statement()
+{
+    if (token == ';')
+    {
         past l1 = newTerminal(";");
         advance();
         return l1;
     }
-    else{
+    else
+    {
         past l1 = astExpr();
-        if(token == ';'){
+        if (token == ';')
+        {
             past l2 = newTerminal(";");
             advance();
-            l1 = connect("expression_statement",l1,l2,NULL,NULL,NULL,NULL,NULL,NULL);
+            l1 = connect("expression_statement", l1, l2, NULL, NULL, NULL, NULL, NULL, NULL);
             return l1;
-        }else{
+        }
+        else
+        {
             return NULL;
         }
     }
 }
 
 //待斟酌
-past astStatement_list(){
+past astStatement_list()
+{
     past l1 = astStatement();
-    if(l1 != NULL){
+    if (l1 != NULL)
+    {
         past l2 = astStatement();
-        while(l2 != NULL){
-            l1 = connect("statement_list",l1,l2,NULL,NULL,NULL,NULL,NULL,NULL);
+        while (l2 != NULL)
+        {
+            l1 = connect("statement_list", l1, l2, NULL, NULL, NULL, NULL, NULL, NULL);
             l2 = astStatement();
         }
         return l1;
     }
-    else{
+    else
+    {
         return NULL;
     }
 }
 
-past astStatement(){
+past astStatement()
+{
     past l1 = astType();
-    if(l1 != NULL){
+    if (l1 != NULL)
+    {
         past l2 = astDeclarator_list();
-        if(token == ';'){
+        if (token == ';')
+        {
             past l3 = newTerminal(";");
             advance();
-            l1 = connect("statement",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
+            l1 = connect("statement", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
             return l1;
         }
-        else{
+        else
+        {
             return NULL;
         }
     }
-//    else{
-//        l1 = astExpression_statement();
-//        if(l1 != NULL){
-//            return l1;
-//        }
-//        else{
-//            return NULL;
-//        }
-//    }
-    switch (token) {
-        case '{':{
-            l1 = newTerminal("{");
+    //    else{
+    //        l1 = astExpression_statement();
+    //        if(l1 != NULL){
+    //            return l1;
+    //        }
+    //        else{
+    //            return NULL;
+    //        }
+    //    }
+    switch (token)
+    {
+    case '{':
+    {
+        l1 = newTerminal("{");
+        advance();
+        past l2 = astStatement_list();
+        if (token == '}')
+        {
+            past l3 = newTerminal("}");
             advance();
-            past l2 = astStatement_list();
-            if(token == '}'){
-                past l3 = newTerminal("}");
-                advance();
-                l1 = connect("statement",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-                return l1;
-            }
-            else{
-                return NULL;
-            }
-            break;
+            l1 = connect("statement", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+            return l1;
         }
-        case IF:{
-            l1 = newTerminal("IF");
-            advance();
-            if(token == '('){
-                past l2 = newTerminal("(");
-                advance();
-                past l3 = astExpr();
-                if(token == ')'){
-                    past l4 = newTerminal(")");
-                    advance();
-                    past l5 = astStatement();
-                    if(token == ELSE){
-                        past l6 = newTerminal("ELSE");
-                        advance();
-                        past l7 = astStatement();
-                        l1 = connect("statement",l1,l2,l3,l4,l5,l6,l7,NULL);
-                        return l1;
-                    }
-                    else{
-                        l1 = connect("statement",l1,l2,l3,l4,l5,NULL,NULL,NULL);
-                        return l1;
-                    }
-                }
-                else{
-                    return NULL;
-                }
-            }
-            else{
-                return NULL;
-            }
-            break;
-        }
-        case WHILE:{
-            l1 = newTerminal("WHILE");
-            advance();
-            if(token == '('){
-                past l2 = newTerminal("(");
-                advance();
-                past l3 = astExpr();
-                if(token == ')'){
-                    past l4 = newTerminal(")");
-                    advance();
-                    past l5 = astStatement();
-                    l1 = connect("statement",l1,l2,l3,l4,l5,NULL,NULL,NULL);
-                    return l1;
-                }
-                else{
-                    return NULL;
-                }
-            }
-            else{
-                return NULL;
-            }
-            break;
-        }
-        case RETURN:{
-            l1 = newTerminal("RETURN");
-            advance();
-            if(token == ';'){
-                past l2 = newTerminal(";");
-                advance();
-                l1 = connect("statement",l1,l2,NULL,NULL,NULL,NULL,NULL,NULL);
-                return l1;
-            }
-            else{
-                past l2 = astExpr();
-                if(token == ';'){
-                past l3 = newTerminal(";");
-                    advance();
-                    l1 = connect("statement",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-                    return l1;
-                }
-                else{
-                    return NULL;
-                }
-            }
-            break;
-        }
-        case PRINT:{
-            l1 = newTerminal("PRINT");
-            advance();
-            if(token == ';'){
-                past l2 = newTerminal(";");
-                advance();
-                l1 = connect("statement",l1,l2,NULL,NULL,NULL,NULL,NULL,NULL);
-                return l1;
-            }
-            else{
-                past l2 = astExpr_list();
-                if(token == ';'){
-                    past l3 = newTerminal(";");
-                    advance();
-                    l1 = connect("statement",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-                    return l1;
-                }
-                else{
-                    return NULL;
-                }
-            }
-            break;
-        }
-        case SCAN:{
-            l1 = newTerminal("SCAN");
-            advance();
-            past l2 = astId_list();
-            if(token == ';'){
-                past l3 = newTerminal(";");
-                advance();
-                l1 = connect("statement",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-                return l1;
-            }
-            else{
-                return NULL;
-            }
-            break;
-        }
-        default:
+        else
+        {
             return NULL;
+        }
+        break;
+    }
+    case IF:
+    {
+        l1 = newTerminal("IF");
+        advance();
+        if (token == '(')
+        {
+            past l2 = newTerminal("(");
+            advance();
+            past l3 = astExpr();
+            if (token == ')')
+            {
+                past l4 = newTerminal(")");
+                advance();
+                past l5 = astStatement();
+                if (token == ELSE)
+                {
+                    past l6 = newTerminal("ELSE");
+                    advance();
+                    past l7 = astStatement();
+                    l1 = connect("statement", l1, l2, l3, l4, l5, l6, l7, NULL);
+                    return l1;
+                }
+                else
+                {
+                    l1 = connect("statement", l1, l2, l3, l4, l5, NULL, NULL, NULL);
+                    return l1;
+                }
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        else
+        {
+            return NULL;
+        }
+        break;
+    }
+    case WHILE:
+    {
+        l1 = newTerminal("WHILE");
+        advance();
+        if (token == '(')
+        {
+            past l2 = newTerminal("(");
+            advance();
+            past l3 = astExpr();
+            if (token == ')')
+            {
+                past l4 = newTerminal(")");
+                advance();
+                past l5 = astStatement();
+                l1 = connect("statement", l1, l2, l3, l4, l5, NULL, NULL, NULL);
+                return l1;
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        else
+        {
+            return NULL;
+        }
+        break;
+    }
+    case RETURN:
+    {
+        l1 = newTerminal("RETURN");
+        advance();
+        if (token == ';')
+        {
+            past l2 = newTerminal(";");
+            advance();
+            l1 = connect("statement", l1, l2, NULL, NULL, NULL, NULL, NULL, NULL);
+            return l1;
+        }
+        else
+        {
+            past l2 = astExpr();
+            if (token == ';')
+            {
+                past l3 = newTerminal(";");
+                advance();
+                l1 = connect("statement", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+                return l1;
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        break;
+    }
+    case PRINT:
+    {
+        l1 = newTerminal("PRINT");
+        advance();
+        if (token == ';')
+        {
+            past l2 = newTerminal(";");
+            advance();
+            l1 = connect("statement", l1, l2, NULL, NULL, NULL, NULL, NULL, NULL);
+            return l1;
+        }
+        else
+        {
+            past l2 = astExpr_list();
+            if (token == ';')
+            {
+                past l3 = newTerminal(";");
+                advance();
+                l1 = connect("statement", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+                return l1;
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        break;
+    }
+    case SCAN:
+    {
+        l1 = newTerminal("SCAN");
+        advance();
+        past l2 = astId_list();
+        if (token == ';')
+        {
+            past l3 = newTerminal(";");
+            advance();
+            l1 = connect("statement", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+            return l1;
+        }
+        else
+        {
+            return NULL;
+        }
+        break;
+    }
+    default:
+        return NULL;
     }
 }
 
-past astType(){
+past astType()
+{
     past l1;
-    if(token == INT){
+    if (token == INT)
+    {
         l1 = newTerminal("INT");
         advance();
-    }else if(token == STR){
+    }
+    else if (token == STR)
+    {
         l1 = newTerminal("STR");
         advance();
-    }else if(token == VOID){
+    }
+    else if (token == VOID)
+    {
         l1 = newTerminal("VOID");
         advance();
-    }else{
+    }
+    else
+    {
         return NULL;
     }
     return l1;
 }
 
-past astParameter(){
+past astParameter()
+{
     past l1 = astType();
-    if(token == ID){
+    if (token == ID)
+    {
         past l2 = newTerminal("ID");
         advance();
-        l1 = connect("parameter",l1,l2,NULL,NULL,NULL,NULL,NULL,NULL);
+        l1 = connect("parameter", l1, l2, NULL, NULL, NULL, NULL, NULL, NULL);
         return l1;
     }
-    else{
+    else
+    {
         return NULL;
     }
 }
 
-past astParameter_list(){
+past astParameter_list()
+{
     past l1 = astParameter();
-    if(l1 != NULL){
-        while(token == ','){
+    if (l1 != NULL)
+    {
+        while (token == ',')
+        {
             past l2 = newTerminal(",");
             advance();
             past l3 = astParameter();
-            if(l3 != NULL){
-                l1 = connect("parameter_liat",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
+            if (l3 != NULL)
+            {
+                l1 = connect("parameter_liat", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
             }
-            else{
+            else
+            {
                 return NULL;
             }
         }
         return l1;
     }
-    else{
+    else
+    {
         return NULL;
     }
 }
 
-past astDeclarator(){
-    if(token == ID){
+past astDeclarator()
+{
+    if (token == ID)
+    {
         past l1 = newTerminal("ID");
         advance();
-        switch (token) {
-            case '=':{
-                past l2 = newTerminal("=");
-                advance();
-                past l3 = astExpr();
-                if(l3 != NULL){
-                    l1 = connect("declarator",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-                    return l1;
-                }
-                else{
-                    return NULL;
-                }
-                break;
+        switch (token)
+        {
+        case '=':
+        {
+            past l2 = newTerminal("=");
+            advance();
+            past l3 = astExpr();
+            if (l3 != NULL)
+            {
+                l1 = connect("declarator", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+                return l1;
             }
-            case '(':{
-                past l2 = newTerminal("(");
+            else
+            {
+                return NULL;
+            }
+            break;
+        }
+        case '(':
+        {
+            past l2 = newTerminal("(");
+            advance();
+            if (token == ')')
+            {
+                past l3 = newTerminal(")");
                 advance();
-                if(token == ')'){
-                    past l3 = newTerminal(")");
-                    advance();
-                    l1 = connect("declarator",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-                    return l1;
-                }
-                else{
-                    past l3 = astParameter_list();
-                    if(l3 != NULL){
-                        if(token == ')'){
-                            past l4 = newTerminal(")");
-                            advance();
-                            l1 = connect("declarator",l1,l2,l3,l4,NULL,NULL,NULL,NULL);
-                            return l1;
-                        }
-                        else{
-                            return NULL;
-                        }
+                l1 = connect("declarator", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+                return l1;
+            }
+            else
+            {
+                past l3 = astParameter_list();
+                if (l3 != NULL)
+                {
+                    if (token == ')')
+                    {
+                        past l4 = newTerminal(")");
+                        advance();
+                        l1 = connect("declarator", l1, l2, l3, l4, NULL, NULL, NULL, NULL);
+                        return l1;
                     }
-                    else{
+                    else
+                    {
                         return NULL;
                     }
                 }
-                break;
+                else
+                {
+                    return NULL;
+                }
             }
-            case '[':{
-                past l2 = newTerminal("[");
+            break;
+        }
+        case '[':
+        {
+            past l2 = newTerminal("[");
+            advance();
+            if (token == ']')
+            {
+                past l3 = newTerminal("]");
                 advance();
-                if(token == ']'){
-                    past l3 = newTerminal("]");
+                if (token == '=')
+                {
+                    past l4 = newTerminal("=");
                     advance();
-                    if(token == '='){
-                        past l4 = newTerminal("=");
+                    if (token == '{')
+                    {
+                        past l5 = newTerminal("{");
                         advance();
-                        if(token == '{'){
-                            past l5 = newTerminal("{");
-                            advance();
-                            past l6 = astInstr_list();
-                            if(l6 != NULL){
-                                if(token == '}'){
-                                    past l7 = newTerminal("}");
-                                    advance();
-                                    l1 = connect("declarator",l1,l2,l3,l4,l5,l6,l7,NULL);
-                                    return l1;
-                                }
-                                else{
-                                    return NULL;
-                                }
+                        past l6 = astInstr_list();
+                        if (l6 != NULL)
+                        {
+                            if (token == '}')
+                            {
+                                past l7 = newTerminal("}");
+                                advance();
+                                l1 = connect("declarator", l1, l2, l3, l4, l5, l6, l7, NULL);
+                                return l1;
                             }
-                            else{
+                            else
+                            {
                                 return NULL;
                             }
                         }
-                        else{
+                        else
+                        {
                             return NULL;
                         }
                     }
-                    else{
-                        l1 = connect("declarator",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-                        return l1;
+                    else
+                    {
+                        return NULL;
                     }
                 }
-                else{
-                    past l3 = astExpr();
-                    if(l3 != NULL){
-                        if(token == ']'){
-                            past l4 = newTerminal("]");
+                else
+                {
+                    l1 = connect("declarator", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+                    return l1;
+                }
+            }
+            else
+            {
+                past l3 = astExpr();
+                if (l3 != NULL)
+                {
+                    if (token == ']')
+                    {
+                        past l4 = newTerminal("]");
+                        advance();
+                        if (token == '=')
+                        {
+                            past l5 = newTerminal("=");
                             advance();
-                            if(token == '='){
-                                past l5 = newTerminal("=");
+                            if (token == '{')
+                            {
+                                past l6 = newTerminal("{");
                                 advance();
-                                if(token == '{'){
-                                    past l6 = newTerminal("{");
-                                    advance();
-                                    past l7 = astInstr_list();
-                                    if(l7 != NULL){
-                                        if(token == '}'){
-                                            past l8 = newTerminal("}");
-                                            advance();
-                                            l1 = connect("declarator",l1,l2,l3,l4,l5,l6,l7,l8);
-                                            return l1;
-                                        }
-                                        else{
-                                            return NULL;
-                                        }
+                                past l7 = astInstr_list();
+                                if (l7 != NULL)
+                                {
+                                    if (token == '}')
+                                    {
+                                        past l8 = newTerminal("}");
+                                        advance();
+                                        l1 = connect("declarator", l1, l2, l3, l4, l5, l6, l7, l8);
+                                        return l1;
                                     }
-                                    else{
+                                    else
+                                    {
                                         return NULL;
                                     }
                                 }
-                                else{
+                                else
+                                {
                                     return NULL;
                                 }
                             }
-                            else{
-                                l1 = connect("declarator",l1,l2,l3,l4,NULL,NULL,NULL,NULL);
-                                return l1;
+                            else
+                            {
+                                return NULL;
                             }
                         }
-                        else{
-                            return NULL;
+                        else
+                        {
+                            l1 = connect("declarator", l1, l2, l3, l4, NULL, NULL, NULL, NULL);
+                            return l1;
                         }
                     }
-                    else{
+                    else
+                    {
                         return NULL;
                     }
                 }
-                break;
-            }
-            default:{
-                return l1;
-            }
-        }
-    }
-    else{
-        return NULL;
-    }
-}
-
-past astInitializer(){
-    if(token == NUMBER){
-        past l1 = newNum(token);
-        advance();
-        return l1;
-    }else if(token == STRING){
-        past l1 = newTerminal("STRING");
-        advance();
-        return l1;
-    }else{
-        return NULL;
-    }
-}
-
-past astInstr_list(){
-    past l1 = astInitializer();
-    if(l1 != NULL){
-        while(token == ','){
-            past l2 = newTerminal(",");
-            advance();
-            past l3 = astInitializer();
-            if(l3 != NULL){
-                l1 = connect("instr_list",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-            }
-            else{
-                return NULL;
-            }
-        }
-        return l1;
-    }
-    else{
-        return NULL;
-    }
-    return NULL;
-}
-
-past astDeclarator_list(){
-    past l1 = astDeclarator();
-    if(l1 != NULL){
-        while(token == ','){
-            past l2 = newTerminal(",");
-            advance();
-            past l3 = astDeclarator();
-            if(l3 != NULL){
-                l1 = connect("declarator_list",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-            }
-            else{
-                return NULL;
-            }
-        }
-        return l1;
-    }
-    else{
-        return NULL;
-    }
-    return NULL;
-}
-
-past astDecl_or_stmt(){
-    switch (token) {
-        case '{':{
-            past l1 = newTerminal("{");
-            advance();
-            if(token == '}'){
-                past l2 = newTerminal("}");
-                advance();
-                l1 = connect("decl_or_stmt",l1,l2,NULL,NULL,NULL,NULL,NULL,NULL);
-                return l1;
-            }
-            else{
-                past l2 = astStatement_list();
-                if(l2 != NULL){
-                    if(token == '}'){
-                        past l3 = newTerminal("}");
-                        advance();
-                        l1 = connect("decl_or_stmt",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-                        return l1;
-                    }
-                    else{
-                        return NULL;
-                    }
-                }
-                else{
+                else
+                {
                     return NULL;
                 }
             }
-            break;
-        }
-        case ',':{
-            past l1 = newTerminal(",");
-            advance();
-            past l2 = astDeclarator_list();
-            if(l2 != NULL){
-                if(token == ';'){
-                    past l3 = newTerminal(";");
-                    advance();
-                    l1 = connect("decl_or_stmt",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-                    return l1;
-                }
-                else{
-                    return NULL;
-                }
-            }
-            else{
-                return NULL;
-            }
-            break;
-        }
-        case ';':{
-            past l1 = newTerminal(";");
-            advance();
-            return l1;
             break;
         }
         default:
-            return NULL;
-    }
-    return NULL;
-}
-
-past astExternal_delcaration(){
-    past l1 = astType();
-    if(l1 != NULL){
-        past l2 = astDeclarator();
-        if(l2 != NULL){
-            past l3 = astDecl_or_stmt();
-            if(l3 != NULL){
-                l1 = connect("external_declaration",l1,l2,l3,NULL,NULL,NULL,NULL,NULL);
-                return l1;
-            }
-            else{
-                return NULL;
-            }
+        {
+            return l1;
         }
-        else{
-            return NULL;
         }
     }
-    else{
+    else
+    {
         return NULL;
     }
 }
 
-past astProgram(){
+past astInitializer()
+{
+    if (token == NUMBER)
+    {
+        past l1 = newNum(token);
+        advance();
+        return l1;
+    }
+    else if (token == STRING)
+    {
+        past l1 = newTerminal("STRING");
+        advance();
+        return l1;
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+past astInstr_list()
+{
+    past l1 = astInitializer();
+    if (l1 != NULL)
+    {
+        while (token == ',')
+        {
+            past l2 = newTerminal(",");
+            advance();
+            past l3 = astInitializer();
+            if (l3 != NULL)
+            {
+                l1 = connect("instr_list", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        return l1;
+    }
+    else
+    {
+        return NULL;
+    }
+    return NULL;
+}
+
+past astDeclarator_list()
+{
+    past l1 = astDeclarator();
+    if (l1 != NULL)
+    {
+        while (token == ',')
+        {
+            past l2 = newTerminal(",");
+            advance();
+            past l3 = astDeclarator();
+            if (l3 != NULL)
+            {
+                l1 = connect("declarator_list", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        return l1;
+    }
+    else
+    {
+        return NULL;
+    }
+    return NULL;
+}
+
+past astDecl_or_stmt()
+{
+    switch (token)
+    {
+    case '{':
+    {
+        past l1 = newTerminal("{");
+        advance();
+        if (token == '}')
+        {
+            past l2 = newTerminal("}");
+            advance();
+            l1 = connect("decl_or_stmt", l1, l2, NULL, NULL, NULL, NULL, NULL, NULL);
+            return l1;
+        }
+        else
+        {
+            past l2 = astStatement_list();
+            if (l2 != NULL)
+            {
+                if (token == '}')
+                {
+                    past l3 = newTerminal("}");
+                    advance();
+                    l1 = connect("decl_or_stmt", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+                    return l1;
+                }
+                else
+                {
+                    return NULL;
+                }
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        break;
+    }
+    case ',':
+    {
+        past l1 = newTerminal(",");
+        advance();
+        past l2 = astDeclarator_list();
+        if (l2 != NULL)
+        {
+            if (token == ';')
+            {
+                past l3 = newTerminal(";");
+                advance();
+                l1 = connect("decl_or_stmt", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+                return l1;
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        else
+        {
+            return NULL;
+        }
+        break;
+    }
+    case ';':
+    {
+        past l1 = newTerminal(";");
+        advance();
+        return l1;
+        break;
+    }
+    default:
+        return NULL;
+    }
+    return NULL;
+}
+
+past astExternal_delcaration()
+{
+    past l1 = astType();
+    if (l1 != NULL)
+    {
+        past l2 = astDeclarator();
+        if (l2 != NULL)
+        {
+            past l3 = astDecl_or_stmt();
+            if (l3 != NULL)
+            {
+                l1 = connect("external_declaration", l1, l2, l3, NULL, NULL, NULL, NULL, NULL);
+                return l1;
+            }
+            else
+            {
+                return NULL;
+            }
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+past astProgram()
+{
     past l1 = astExternal_delcaration();
-    if(l1 != NULL){
+    if (l1 != NULL)
+    {
         past l2 = astExternal_delcaration();
-        while(l2 != NULL){
-            l1 = connect("program",l1,l2,NULL,NULL,NULL,NULL,NULL,NULL);
+        while (l2 != NULL)
+        {
+            l1 = connect("program", l1, l2, NULL, NULL, NULL, NULL, NULL, NULL);
             l2 = astExternal_delcaration();
         }
         return l1;
     }
-    else{
+    else
+    {
         return NULL;
     }
 }
 
 void showAst(past node, int nest)
 {
-    if(node == NULL)
+    if (node == NULL)
         return;
     int i = 0;
-    for(i = 0; i < nest; i ++)
-        printf("  ");
-    if(strcmp(node->nodeType, ",") == 0)
+    for (i = 0; i < nest; i++)
+        printf("   ");
+    if (strcmp(node->nodeType, " ") == 0)
+    {
+        nest--;
+    }
+    else if (strcmp(node->nodeType, "program") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "=") == 0)
+    else if (strcmp(node->nodeType, "external_declaration") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "]") == 0)
+    else if (strcmp(node->nodeType, "function_definition") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "[") == 0)
+    else if (strcmp(node->nodeType, "declaration") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "(") == 0)
+    else if (strcmp(node->nodeType, "init_declarator_list") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, ")") == 0)
+    else if (strcmp(node->nodeType, "init_declarator") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "-") == 0)
+    else if (strcmp(node->nodeType, "intstr_list") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "+") == 0)
+    else if (strcmp(node->nodeType, "initializer") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "*") == 0)
+    else if (strcmp(node->nodeType, "declarator") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "/") == 0)
+    else if (strcmp(node->nodeType, "direct_declarator") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "%") == 0)
+    else if (strcmp(node->nodeType, "parameter_list") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, ";") == 0)
+    else if (strcmp(node->nodeType, "parameter") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "{") == 0)
+    else if (strcmp(node->nodeType, "type") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "}") == 0)
+    else if (strcmp(node->nodeType, "statement") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "ID") == 0)
+    else if (strcmp(node->nodeType, "compound_statement") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "NUMBER") == 0)
+    else if (strcmp(node->nodeType, "begin_scope") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "STRING") == 0)
+    else if (strcmp(node->nodeType, "end_scope") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "CMP") == 0)
+    else if (strcmp(node->nodeType, "statement_list") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "IF") == 0)
+    else if (strcmp(node->nodeType, "expression_statement") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "RETURN") == 0)
+    else if (strcmp(node->nodeType, "selection_statement") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "PRINT") == 0)
+    else if (strcmp(node->nodeType, "iteration_statement") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "SCAN") == 0)
+    else if (strcmp(node->nodeType, "jump_statement") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "WHILE") == 0)
+    else if (strcmp(node->nodeType, "print_statement") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "INT") == 0)
+    else if (strcmp(node->nodeType, "scan_statement") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "VOID") == 0)
+    else if (strcmp(node->nodeType, "expr") == 0)
         printf("%s\n", node->nodeType);
-    else if(strcmp(node->nodeType, "STR") == 0)
+    else if (strcmp(node->nodeType, "assign_expr") == 0)
         printf("%s\n", node->nodeType);
-    
-    showAst(node->child1, nest+1);
-    showAst(node->child2, nest+1);
-    showAst(node->child3, nest+1);
-    showAst(node->child4, nest+1);
-    showAst(node->child5, nest+1);
-    showAst(node->child6, nest+1);
-    showAst(node->child7, nest+1);
-    showAst(node->child8, nest+1);
+    else if (strcmp(node->nodeType, "cmp_expr") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "add_expr") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "mul_expr") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "primary_expr") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "expr_list") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "id_list") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, ",") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "=") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "]") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "[") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "(") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, ")") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "-") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "+") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "*") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "/") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "%") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, ";") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "{") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "}") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "ID") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "NUMBER") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "STRING") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "CMP") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "IF") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "ELSE") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "RETURN") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "PRINT") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "SCAN") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "WHILE") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "INT") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "VOID") == 0)
+        printf("%s\n", node->nodeType);
+    else if (strcmp(node->nodeType, "STR") == 0)
+        printf("%s\n", node->nodeType);
+
+    showAst(node->child1, nest + 1);
+    showAst(node->child2, nest + 1);
+    showAst(node->child3, nest + 1);
+    showAst(node->child4, nest + 1);
+    showAst(node->child5, nest + 1);
+    showAst(node->child6, nest + 1);
+    showAst(node->child7, nest + 1);
+    showAst(node->child8, nest + 1);
 }
 
-int main(int argc, char ** argv) {
+int main(int argc, char **argv)
+{
     // advance();
     // past l = astProgram();
     // showAst(l,0);

@@ -45,20 +45,20 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    IF = 258,
-    ELSE = 259,
-    WHILE = 260,
-    RETURN = 261,
-    PRINT = 262,
-    SCAN = 263,
-    STR = 264,
-    INT = 265,
-    VOID = 266,
-    NUMBER = 267,
-    CMP = 268,
-    ASSIGN = 269,
-    ID = 270,
-    STRING = 271
+    VOID = 264,
+    STR = 263,
+    STRING = 260,
+    INT = 273,
+    ID = 274,
+    ASSIGN = 275,
+    NUMBER = 276,
+    CMP = 277,
+    IF = 266,
+    WHILE = 267,
+    ELSE = 268,
+    PRINT = 270,
+    SCAN = 271,
+    RETURN = 278
   };
 #endif
 
@@ -67,12 +67,14 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 13 "lrparser.y" /* yacc.c:1909  */
+#line 12 "lrparser.y" /* yacc.c:1909  */
 
-	int	iValue;
+    int	iValue;
 	struct _ast*	pAst;
+    char *String;
+    char * id;
 
-#line 76 "lrparser.tab.h" /* yacc.c:1909  */
+#line 78 "lrparser.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
